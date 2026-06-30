@@ -37,10 +37,12 @@
 *.sln
 *.suo
 *.opensdf
+*.opendb
 *.sdf
 *.VC.db
 *.VC.opendb
 .vsconfig
+.vscode
 
 # Precompiled Assets
 SourceArt/**/*.png
