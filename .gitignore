@@ -75,3 +75,24 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Third party asset packs
+Content/StarterContent/
+Content/EuropeanBeech/
+Content/StylizedNaturePack/
+
+# Quixel Megascans and Fab
+Content/Fab/
+Content/MSPresets/
+
+# Level and Landscape data
+Content/Landscape/
+Content/Maps/
+
+# World Partition generated data
+Content/__ExternalActors__/
+Content/__ExternalObjects__/
+
+# Local development directories
+Content/Developers/
+Content/Collections/
