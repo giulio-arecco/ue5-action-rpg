@@ -1,5 +1,9 @@
-# Visual Studio 2015 user specific files
+# Visual Studio user specific files
 .vs/
+
+# JetBrains Rider files and folders
+.idea/
+*.user
 
 # Compiled Object files
 *.slo
