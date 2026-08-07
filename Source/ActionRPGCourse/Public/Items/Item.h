@@ -14,4 +14,14 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+private:
+	UPROPERTY(VisibleInstanceOnly)
+	double RunningTime;
+
+	UPROPERTY(EditAnywhere)
+	float MovementAmplitude;
+
+	UPROPERTY(EditAnywhere)
+	float MovementPeriod;
 };
