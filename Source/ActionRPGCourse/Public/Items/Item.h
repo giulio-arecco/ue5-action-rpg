@@ -14,14 +14,14 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	
-private:
-	UPROPERTY(VisibleInstanceOnly)
-	double RunningTime;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Values")
 	float MovementAmplitude;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Values")
 	float MovementPeriod;
+	
+private:
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	double RunningTime;
 };
