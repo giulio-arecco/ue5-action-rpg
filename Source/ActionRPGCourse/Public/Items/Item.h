@@ -21,6 +21,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Values")
 	float MovementPeriod;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sine Values")
+	FVector StartLocation;
+
 	UFUNCTION(BlueprintPure)
 	float TransformedSin() const;
 
@@ -30,6 +33,4 @@ protected:
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	double RunningTime;
-
-	FVector StartLocation;
 };

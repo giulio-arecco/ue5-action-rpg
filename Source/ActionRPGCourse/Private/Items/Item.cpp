@@ -1,7 +1,7 @@
 #include "Items/Item.h"
 #include "DebugUtils.h"
 
-AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), RunningTime(0.0f) {
+AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.0f), RunningTime(0.0f) {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -24,21 +24,16 @@ void AItem::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	RunningTime += DeltaTime;
-	
-	const float DeltaZ = TransformedSin();
-	
-	FVector NewLocation = StartLocation;
-	NewLocation.Z += DeltaZ;
-	
-	SetActorLocation(NewLocation);
 
 	constexpr float RotationRate = 45.0f;
 	AddActorWorldRotation(FRotator(0.0f, RotationRate * DeltaTime, 0.0f));
 
+	const FVector Location = GetActorLocation();
 	const FVector Forward = GetActorForwardVector();
 	const FVector ScaledForward = Forward * 50.0f;
 
 	const UWorld* World = GetWorld();
-	FDebugUtils::DrawSphereSingleFrame(World, NewLocation, 25.0f);
-	FDebugUtils::DrawVectorSingleFrame(World, NewLocation, NewLocation + ScaledForward);
+
+	FDebugUtils::DrawSphereSingleFrame(World, Location, 25.0f);
+	FDebugUtils::DrawVectorSingleFrame(World, Location, Location + ScaledForward);
 }
