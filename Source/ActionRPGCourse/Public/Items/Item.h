@@ -33,4 +33,12 @@ protected:
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	double RunningTime;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ItemMesh;
+
+	template<typename T>
+	T Avg(T First, T Second) {
+		return (First + Second) / 2;
+	}
 };
