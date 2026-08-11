@@ -5,8 +5,8 @@ AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>("ItemMeshComponent");
-	RootComponent = ItemMesh;
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
+	SetRootComponent(ItemMesh);
 }
 
 void AItem::BeginPlay() {

@@ -1,8 +1,13 @@
 ﻿#include "Bird.h"
-
+#include "Components/CapsuleComponent.h"
 
 ABird::ABird() {
 	PrimaryActorTick.bCanEverTick = true;
+
+	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BirdCapsuleComponent"));
+	Capsule->SetCapsuleSize(15.0f, 20.0f);
+
+	SetRootComponent(Capsule);
 }
 
 void ABird::BeginPlay() {
