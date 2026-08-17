@@ -51,12 +51,20 @@ void ABird::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 }
 
 void ABird::MoveTriggered(const FInputActionValue& Value) {
-	const bool CurrentValue = Value.Get<bool>();
-	UE_LOG(LogTemp, Warning, TEXT("MoveAction Triggered (Value: %s)"), CurrentValue ? TEXT("true") : TEXT("false"));
+	// DirectionValue can currently store 0.0f, 1.0f or -1.0f
+	const float DirectionValue = Value.Get<float>();
+	
+	UE_LOG(LogTemp, Warning, TEXT("MoveAction Triggered (Value: %f)"), DirectionValue);
+
+	if (GetController() != nullptr && DirectionValue != 0.0f) {
+		const FVector Forward = GetActorForwardVector();
+		// Apply the movement along the Forward direction, scaled by DirectionValue
+		AddMovementInput(Forward, DirectionValue);
+	}
 }
 
 void ABird::MoveCompleted(const FInputActionValue& Value) {
-	const bool CurrentValue = Value.Get<bool>();
-	UE_LOG(LogTemp, Warning, TEXT("MoveAction Completed (Value: %s)"), CurrentValue ? TEXT("true") : TEXT("false"));
+	const float DirectionValue = Value.Get<float>();
+	UE_LOG(LogTemp, Warning, TEXT("MoveAction Completed (Value: %f)"), DirectionValue);
 }
 
