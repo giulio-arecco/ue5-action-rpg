@@ -1,12 +1,15 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "GameFramework/Pawn.h"
 
 #include "Bird.generated.h"
 
+class UInputAction;
 class UCapsuleComponent;
 class USkeletalMeshComponent;
+class UInputMappingContext;
 
 UCLASS()
 class ACTIONRPGCOURSE_API ABird : public APawn {
@@ -21,9 +24,19 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputMappingContext* BirdMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* MoveAction;
+	
 	virtual void BeginPlay() override;
 
-	void MoveForward(float Value);
+	// The callback related to the MoveAction input action triggered event
+	void MoveTriggered(const FInputActionValue& Value);
+
+	// The callback related to the MoveAction input action completed event
+	void MoveCompleted(const FInputActionValue& Value);
 
 private:
 	UPROPERTY(VisibleAnywhere)
