@@ -2,20 +2,30 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 ABird::ABird() {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BirdCapsuleComponent"));
+	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BirdCapsule"));
 	Capsule->SetCapsuleSize(15.0f, 20.0f);
 	// Replaces the DefaultRootComponent in the component hierarchy
 	SetRootComponent(Capsule);
 
-	BirdMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BirdSkeletalMeshComponent"));
+	BirdMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BirdSkeletalMesh"));
 	// Makes BirdMesh a child component of the RootComponent
 	BirdMesh->SetupAttachment(GetRootComponent());
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("BirdSpringArm"));
+	SpringArm->SetupAttachment(GetRootComponent());
+	SpringArm->TargetArmLength = 300.0f;
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("BirdCamera"));
+	// Makes BirdMesh a child component of the SpringArm component
+	Camera->SetupAttachment(SpringArm);
 
 	// Makes the Player0 PlayerController the possessor of this Pawn, allowing it to control it
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
