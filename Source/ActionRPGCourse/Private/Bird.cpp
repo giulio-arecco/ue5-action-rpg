@@ -30,9 +30,6 @@ ABird::ABird() {
 	// Makes this Pawn pitch and yaw follow its Controller pitch and yaw
 	bUseControllerRotationPitch = true;
 	bUseControllerRotationYaw = true;
-	
-	// Makes the Player0 PlayerController the possessor of this Pawn, allowing it to control it
-	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 void ABird::BeginPlay() {
