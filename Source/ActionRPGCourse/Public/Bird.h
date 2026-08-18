@@ -31,14 +31,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* LookAction;
 	
 	virtual void BeginPlay() override;
 
 	// The callback related to the MoveAction input action triggered event
 	void MoveTriggered(const FInputActionValue& Value);
 
-	// The callback related to the MoveAction input action completed event
-	void MoveCompleted(const FInputActionValue& Value);
+	// The callback related to the LookAction input action triggered event
+	void LookTriggered(const FInputActionValue& Value);
 
 private:
 	UPROPERTY(VisibleAnywhere)

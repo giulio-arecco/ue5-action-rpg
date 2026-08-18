@@ -27,6 +27,10 @@ ABird::ABird() {
 	// Makes BirdMesh a child component of the SpringArm component
 	Camera->SetupAttachment(SpringArm);
 
+	// Makes this Pawn pitch and yaw follow its Controller pitch and yaw
+	bUseControllerRotationPitch = true;
+	bUseControllerRotationYaw = true;
+	
 	// Makes the Player0 PlayerController the possessor of this Pawn, allowing it to control it
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -54,9 +58,9 @@ void ABird::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 
 	// Cast the UInputComponent to the derived UEnhancedInputComponent class
 	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		// Set up callbacks for the MoveAction input action
+		// Set up callbacks for the input actions
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABird::MoveTriggered);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ABird::MoveCompleted);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABird::LookTriggered);
 	}
 }
 
@@ -64,8 +68,6 @@ void ABird::MoveTriggered(const FInputActionValue& Value) {
 	// DirectionValue can currently store 0.0f, 1.0f or -1.0f
 	const float DirectionValue = Value.Get<float>();
 	
-	UE_LOG(LogTemp, Warning, TEXT("MoveAction Triggered (Value: %f)"), DirectionValue);
-
 	if (GetController() != nullptr && DirectionValue != 0.0f) {
 		const FVector Forward = GetActorForwardVector();
 		// Apply the movement along the Forward direction, scaled by DirectionValue
@@ -73,8 +75,13 @@ void ABird::MoveTriggered(const FInputActionValue& Value) {
 	}
 }
 
-void ABird::MoveCompleted(const FInputActionValue& Value) {
-	const float DirectionValue = Value.Get<float>();
-	UE_LOG(LogTemp, Warning, TEXT("MoveAction Completed (Value: %f)"), DirectionValue);
+void ABird::LookTriggered(const FInputActionValue& Value) {
+	const FVector2D LookAxisValue = Value.Get<FVector2D>();
+	
+	if (GetController() != nullptr && LookAxisValue != FVector2D::ZeroVector) {
+		// Add the input value to the pawn's controller rotation (the pawn must be set up to follow the controller's rotation)
+		AddControllerYawInput(LookAxisValue.X);
+		AddControllerPitchInput(LookAxisValue.Y);
+	}
 }
 
