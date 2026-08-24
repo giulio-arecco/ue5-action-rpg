@@ -5,6 +5,7 @@
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
 
+class UGroomComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -39,4 +40,10 @@ private:
 	
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArm;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Hair")
+	UGroomComponent* Hair;
+
+	UPROPERTY(VisibleAnywhere, Category = "Hair")
+	UGroomComponent* Eyebrows;
 };
