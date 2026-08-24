@@ -3,7 +3,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
-#include "Chaos/SoftsSpring.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 APlayerCharacter::APlayerCharacter() {
@@ -12,6 +12,11 @@ APlayerCharacter::APlayerCharacter() {
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
+
+	// Set the character to orient its rotation to movement and update the character's default yaw rotation rate
+	UCharacterMovementComponent* CharMovement = GetCharacterMovement();
+	CharMovement->bOrientRotationToMovement = true;
+	CharMovement->RotationRate = FRotator(0.0f, 480.0f, 0.0f);
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("PlayerCharacterSpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
@@ -48,10 +53,19 @@ void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if(GetController() != nullptr && MovementVector != FVector2D::ZeroVector) {
-		const FVector Forward = GetActorForwardVector();
-		AddMovementInput(Forward, MovementVector.Y);
-		const FVector Right = GetActorRightVector();
-		AddMovementInput(Right, MovementVector.X);
+		// Get the Controller yaw 
+		const FRotator ControlRotation = GetControlRotation();
+		const FRotator YawRotation(0.0f, ControlRotation.Yaw, 0.0f);
+
+		// Get the Controller forward direction
+		const FVector3d ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		// Move this character along its Controller forward direction
+		AddMovementInput(ForwardDir, MovementVector.Y);
+
+		// Get the Controller right direction
+		const FVector3d RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		// Move this character along its Controller right direction
+		AddMovementInput(RightDir, MovementVector.X);
 	}
 }
 
