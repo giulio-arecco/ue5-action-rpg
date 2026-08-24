@@ -5,6 +5,8 @@
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 
@@ -24,6 +26,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* MoveAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* LookAction;
+
 	virtual void BeginPlay() override;
 	void MoveTriggered(const FInputActionValue& Value);
+	void LookTriggered(const FInputActionValue& Value);
+	
+private:
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* ViewCamera;
+	
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* SpringArm;
 };

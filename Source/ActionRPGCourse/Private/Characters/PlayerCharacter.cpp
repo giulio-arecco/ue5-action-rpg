@@ -2,9 +2,23 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Camera/CameraComponent.h"
+#include "Chaos/SoftsSpring.h"
+#include "GameFramework/SpringArmComponent.h"
 
 APlayerCharacter::APlayerCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("PlayerCharacterSpringArm"));
+	SpringArm->SetupAttachment(GetRootComponent());
+	SpringArm->TargetArmLength = 300.0f;
+	
+	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCharacterCamera"));
+	ViewCamera->SetupAttachment(SpringArm);
 }
 
 void APlayerCharacter::BeginPlay() {
@@ -26,6 +40,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveTriggered);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookTriggered);
 	}
 }
 
@@ -37,6 +52,15 @@ void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
 		AddMovementInput(Forward, MovementVector.Y);
 		const FVector Right = GetActorRightVector();
 		AddMovementInput(Right, MovementVector.X);
+	}
+}
+
+void APlayerCharacter::LookTriggered(const FInputActionValue& Value) {
+	const FVector2D LookVector = Value.Get<FVector2D>();
+
+	if (GetController() != nullptr && LookVector != FVector2D::ZeroVector) {
+		AddControllerYawInput(LookVector.X);
+		AddControllerPitchInput(LookVector.Y);
 	}
 }
 
