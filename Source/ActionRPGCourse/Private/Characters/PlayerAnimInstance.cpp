@@ -19,5 +19,6 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds) {
 	if (PlayerCharacterMovement != nullptr) {
 		const FVector CurrentVelocity = PlayerCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(CurrentVelocity);
+		IsFalling = PlayerCharacterMovement->IsFalling();
 	}
 }

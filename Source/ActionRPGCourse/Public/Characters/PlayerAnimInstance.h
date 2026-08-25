@@ -20,7 +20,10 @@ public:
 	UCharacterMovementComponent* PlayerCharacterMovement;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
-	float GroundSpeed; 
+	float GroundSpeed;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Movement")
+	bool IsFalling; 
 	
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
