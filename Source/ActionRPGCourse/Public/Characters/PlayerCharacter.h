@@ -30,6 +30,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* JumpAction;
+
 	virtual void BeginPlay() override;
 	void MoveTriggered(const FInputActionValue& Value);
 	void LookTriggered(const FInputActionValue& Value);
