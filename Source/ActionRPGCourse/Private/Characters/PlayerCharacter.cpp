@@ -68,12 +68,12 @@ void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
 		const FRotator YawRotation(0.0f, ControlRotation.Yaw, 0.0f);
 
 		// Get the Controller forward direction
-		const FVector3d ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector ForwardDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		// Move this character along its Controller forward direction
 		AddMovementInput(ForwardDir, MovementVector.Y);
 
 		// Get the Controller right direction
-		const FVector3d RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		const FVector RightDir = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// Move this character along its Controller right direction
 		AddMovementInput(RightDir, MovementVector.X);
 	}
