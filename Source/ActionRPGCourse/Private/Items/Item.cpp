@@ -1,5 +1,5 @@
 #include "Items/Item.h"
-#include "DebugUtils.h"
+#include "Components/SphereComponent.h"
 
 AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.0f), RunningTime(0.0f) {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -7,12 +7,26 @@ AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	SetRootComponent(ItemMesh);
+
+	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("ItemSphere"));
+	Sphere->SetupAttachment(GetRootComponent());
+	Sphere->SetSphereRadius(150.0f);
 }
 
 void AItem::BeginPlay() {
 	Super::BeginPlay();
 
 	StartLocation = GetActorLocation();
+
+	// Bind a callback to the Sphere overlap delegates
+	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereBeginOverlap);
+	Sphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
+}
+
+void AItem::Tick(float DeltaTime) { 
+	Super::Tick(DeltaTime);
+
+	RunningTime += DeltaTime;
 }
 
 float AItem::TransformedSin() const {
@@ -23,8 +37,20 @@ float AItem::TransformedCos() const {
 	return MovementAmplitude * FMath::Cos(RunningTime * 2 * UE_PI / MovementPeriod);
 }
 
-void AItem::Tick(float DeltaTime) { 
-	Super::Tick(DeltaTime);
+void AItem::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if (GEngine != nullptr) {
+		const FString OtherActorName = OtherActor->GetName();
+		const FString DebugMsg = FString::Printf(TEXT("%s begin overlap with Actor: %s"), *Sphere->GetName(), *OtherActorName);
 
-	RunningTime += DeltaTime;
+		GEngine->AddOnScreenDebugMessage(0, 10.0f, FColor::Cyan, DebugMsg);
+	}
+}
+
+void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+	if (GEngine != nullptr) {
+		const FString OtherActorName = OtherActor->GetName();
+		const FString DebugMsg = FString::Printf(TEXT("%s end overlap with Actor: %s"), *Sphere->GetName(), *OtherActorName);
+
+		GEngine->AddOnScreenDebugMessage(0, 10.0f, FColor::Yellow, DebugMsg);
+	}
 }
