@@ -8,6 +8,11 @@ AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	SetRootComponent(ItemMesh);
 
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
+	ItemMesh->SetCollisionObjectType(ECC_WorldDynamic);
+	ItemMesh->SetCollisionResponseToAllChannels(ECR_Overlap);
+	ItemMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("ItemSphere"));
 	Sphere->SetupAttachment(GetRootComponent());
 	Sphere->SetSphereRadius(150.0f);
