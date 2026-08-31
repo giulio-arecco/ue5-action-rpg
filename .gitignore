@@ -81,12 +81,14 @@ Plugins/**/Intermediate/*
 DerivedDataCache/*
 
 # Third party asset packs
+Assets/
 Content/StarterContent/
 Content/EuropeanBeech/
 Content/StylizedNaturePack/
 Content/AnimalVarietyPack/
 Content/AncientContent/
-Content/Atris_swords
+Content/Atris_swords/
+Content/Mixamo/
 
 # Quixel Megascans and Fab
 Content/Fab/
