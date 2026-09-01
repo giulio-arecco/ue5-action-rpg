@@ -8,7 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Items/Weapons/Weapon.h"
 
-APlayerCharacter::APlayerCharacter() : WeaponHandSocketName("hand_r_socket") {
+APlayerCharacter::APlayerCharacter() : WeaponHandSocketName("hand_r_socket"), CharacterState(ECharacterState::ECS_Unequipped) {
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
@@ -97,6 +97,7 @@ void APlayerCharacter::InteractTriggered() {
 	if (OverlappingWeapon != nullptr) {
 		// TODO: Avoid equipping an already equipped overlapping item
 		OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName);
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	}
 }
 

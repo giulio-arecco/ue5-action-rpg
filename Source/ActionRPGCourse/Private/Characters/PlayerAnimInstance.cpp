@@ -20,5 +20,7 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds) {
 		const FVector CurrentVelocity = PlayerCharacterMovement->Velocity;
 		GroundSpeed = UKismetMathLibrary::VSizeXY(CurrentVelocity);
 		IsFalling = PlayerCharacterMovement->IsFalling();
+
+		CharacterState = PlayerCharacter->GetCharacterState();
 	}
 }

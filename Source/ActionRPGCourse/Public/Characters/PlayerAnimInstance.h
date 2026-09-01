@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "CharacterTypes.h"
 #include "Animation/AnimInstance.h"
 #include "PlayerAnimInstance.generated.h"
 
@@ -19,11 +20,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
 	UCharacterMovementComponent* PlayerCharacterMovement;
 
+	UPROPERTY(BlueprintReadOnly)
+	ECharacterState CharacterState;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
 	float GroundSpeed;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
-	bool IsFalling; 
+	bool IsFalling;
 	
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;

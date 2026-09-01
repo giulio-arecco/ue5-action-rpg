@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "CharacterTypes.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
@@ -46,6 +47,9 @@ protected:
 	void InteractTriggered();
 	
 private:
+	UPROPERTY(VisibleInstanceOnly)
+	ECharacterState CharacterState;
+	
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
 	
@@ -63,4 +67,5 @@ private:
 
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 };
