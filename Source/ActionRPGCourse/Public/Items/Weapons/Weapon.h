@@ -1,17 +1,16 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Items/Item.h"
-#include "AWeapon.generated.h"
+#include "Weapon.generated.h"
 
 UCLASS()
-class ACTIONRPGCOURSE_API AAWeapon : public AItem {
+class ACTIONRPGCOURSE_API AWeapon : public AItem {
 	GENERATED_BODY()
 
 public:
-	AAWeapon();
+	AWeapon();
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -19,7 +18,4 @@ protected:
 	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) override;
 
 	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
-
-public:
-	virtual void Tick(float DeltaTime) override;
 };
