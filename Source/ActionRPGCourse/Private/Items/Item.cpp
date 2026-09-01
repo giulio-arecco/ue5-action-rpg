@@ -1,4 +1,6 @@
 #include "Items/Item.h"
+
+#include "Characters/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 
 AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.0f), RunningTime(0.0f) {
@@ -43,19 +45,15 @@ float AItem::TransformedCos() const {
 }
 
 void AItem::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	if (GEngine != nullptr) {
-		const FString OtherActorName = OtherActor->GetName();
-		const FString DebugMsg = FString::Printf(TEXT("%s begin overlap with Actor: %s"), *Sphere->GetName(), *OtherActorName);
-
-		GEngine->AddOnScreenDebugMessage(0, 10.0f, FColor::Cyan, DebugMsg);
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (PlayerCharacter != nullptr) {
+		PlayerCharacter->SetOverlappingItem(this);
 	}
 }
 
 void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-	if (GEngine != nullptr) {
-		const FString OtherActorName = OtherActor->GetName();
-		const FString DebugMsg = FString::Printf(TEXT("%s end overlap with Actor: %s"), *Sphere->GetName(), *OtherActorName);
-
-		GEngine->AddOnScreenDebugMessage(0, 10.0f, FColor::Yellow, DebugMsg);
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (PlayerCharacter != nullptr) {
+		PlayerCharacter->SetOverlappingItem(nullptr);
 	}
 }

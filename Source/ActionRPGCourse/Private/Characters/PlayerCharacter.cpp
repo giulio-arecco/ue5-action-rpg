@@ -6,8 +6,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Items/Weapons/Weapon.h"
 
-APlayerCharacter::APlayerCharacter() {
+APlayerCharacter::APlayerCharacter() : WeaponHandSocketName("hand_r_socket") {
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
@@ -56,6 +57,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveTriggered);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookTriggered);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::InteractTriggered);
 		// We use the ACharacter::Jump function to handle jumping, since currently there's no need for a APlayerCharacter::JumpTriggered function 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	}
@@ -87,6 +89,14 @@ void APlayerCharacter::LookTriggered(const FInputActionValue& Value) {
 	if (GetController() != nullptr && LookVector != FVector2D::ZeroVector) {
 		AddControllerYawInput(LookVector.X);
 		AddControllerPitchInput(LookVector.Y);
+	}
+}
+
+void APlayerCharacter::InteractTriggered() {
+	const AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+	if (OverlappingWeapon != nullptr) {
+		// TODO: Avoid equipping an already equipped overlapping item
+		OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName);
 	}
 }
 

@@ -5,6 +5,7 @@
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
 
+class AItem;
 class UGroomComponent;
 class USpringArmComponent;
 class UCameraComponent;
@@ -33,9 +34,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* JumpAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* InteractAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	FName WeaponHandSocketName;
+
 	virtual void BeginPlay() override;
 	void MoveTriggered(const FInputActionValue& Value);
 	void LookTriggered(const FInputActionValue& Value);
+	void InteractTriggered();
 	
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -49,4 +57,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Hair")
 	UGroomComponent* Eyebrows;
+
+	UPROPERTY(VisibleInstanceOnly)
+	AItem* OverlappingItem;
+
+public:
+	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 };

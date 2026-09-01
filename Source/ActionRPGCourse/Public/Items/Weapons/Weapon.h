@@ -11,6 +11,7 @@ class ACTIONRPGCOURSE_API AWeapon : public AItem {
 public:
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
+	void Equip(USceneComponent* InParent, FName InSocket) const;
 
 protected:
 	virtual void BeginPlay() override;
