@@ -58,6 +58,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveTriggered);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookTriggered);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::InteractTriggered);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::AttackTriggered);
 		// We use the ACharacter::Jump function to handle jumping, since currently there's no need for a APlayerCharacter::JumpTriggered function 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	}
@@ -98,6 +99,29 @@ void APlayerCharacter::InteractTriggered() {
 		// TODO: Avoid equipping an already equipped overlapping item
 		OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName);
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	}
+}
+
+void APlayerCharacter::AttackTriggered() {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr && AttackMontage != nullptr) {
+		AnimInstance->Montage_Play(AttackMontage);
+
+		FName SectionName = FName();
+		const int32 Random = FMath::RandRange(0, 1);
+		
+		switch(Random) {
+		case 0:
+			SectionName = FName("Attack1");
+			break;
+		case 1:
+			SectionName = FName("Attack2");
+			break;
+		default:
+			UE_LOG(LogTemp, Error, TEXT("APlayerCharacter::AttackTriggered - Invalid Montage Section"));
+		}
+
+		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 	}
 }
 

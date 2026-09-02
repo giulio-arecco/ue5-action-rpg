@@ -38,13 +38,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* InteractAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* AttackAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
 	FName WeaponHandSocketName;
+
+	/************************
+	 *  Animation Montages  *
+	 ***********************/ 
+
+	UPROPERTY(EditDefaultsOnly, Category = "Montages")
+	UAnimMontage* AttackMontage;
 
 	virtual void BeginPlay() override;
 	void MoveTriggered(const FInputActionValue& Value);
 	void LookTriggered(const FInputActionValue& Value);
 	void InteractTriggered();
+	void AttackTriggered();
 	
 private:
 	UPROPERTY(VisibleInstanceOnly)
