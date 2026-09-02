@@ -12,6 +12,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
+class UAnimMontage;
 
 UCLASS()
 class ACTIONRPGCOURSE_API APlayerCharacter : public ACharacter {
@@ -23,6 +24,31 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 protected:
+	virtual void BeginPlay() override;
+
+	/*************************
+	 *    Input Callbacks    *
+	 ************************/ 
+	
+	void MoveTriggered(const FInputActionValue& Value);
+	void LookTriggered(const FInputActionValue& Value);
+	void InteractTriggered();
+	void AttackTriggered();
+	
+	/*********************************
+	 *  Animation-related Functions  *
+	 ********************************/
+
+	void PlayAttackMontage() const;
+	bool CanAttack() const;
+
+	UFUNCTION(BlueprintCallable)
+	void OnAttackEndNotify();
+
+	/*****************************
+	 *  Input-related Variables  *
+	 ****************************/ 
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
 
@@ -41,25 +67,22 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* AttackAction;
 
+	/*********************************
+	 *  Animation-related Variables  *
+	 ********************************/ 
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
 	FName WeaponHandSocketName;
-
-	/************************
-	 *  Animation Montages  *
-	 ***********************/ 
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	UAnimMontage* AttackMontage;
 
-	virtual void BeginPlay() override;
-	void MoveTriggered(const FInputActionValue& Value);
-	void LookTriggered(const FInputActionValue& Value);
-	void InteractTriggered();
-	void AttackTriggered();
-	
 private:
 	UPROPERTY(VisibleInstanceOnly)
 	ECharacterState CharacterState;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	EActionState ActionState;
 	
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
@@ -72,11 +95,15 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Hair")
 	UGroomComponent* Eyebrows;
-
+	
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* OverlappingItem;
 
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
+	
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+	
+	FORCEINLINE EActionState GetActionState() const { return ActionState; }
+	FORCEINLINE void SetActionState(EActionState State) { ActionState = State; }
 };

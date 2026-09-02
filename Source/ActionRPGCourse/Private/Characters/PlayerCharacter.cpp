@@ -103,14 +103,24 @@ void APlayerCharacter::InteractTriggered() {
 }
 
 void APlayerCharacter::AttackTriggered() {
+	if (CanAttack()) {
+		ActionState = EActionState::EAS_Attacking;
+		PlayAttackMontage();
+	}
+}
+
+bool APlayerCharacter::CanAttack() const {
+	return CharacterState != ECharacterState::ECS_Unequipped &&
+		ActionState == EActionState::EAS_Unoccupied;
+}
+
+void APlayerCharacter::PlayAttackMontage() const {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance != nullptr && AttackMontage != nullptr) {
 		AnimInstance->Montage_Play(AttackMontage);
 
 		FName SectionName = FName();
-		const int32 Random = FMath::RandRange(0, 1);
-		
-		switch(Random) {
+		switch(FMath::RandRange(0, 1)) {
 		case 0:
 			SectionName = FName("Attack1");
 			break;
@@ -123,5 +133,9 @@ void APlayerCharacter::AttackTriggered() {
 
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 	}
+}
+
+void APlayerCharacter::OnAttackEndNotify() {
+	ActionState = EActionState::EAS_Unoccupied;
 }
 
