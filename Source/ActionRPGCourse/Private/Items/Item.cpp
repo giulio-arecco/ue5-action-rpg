@@ -26,8 +26,8 @@ void AItem::BeginPlay() {
 	StartLocation = GetActorLocation();
 
 	// Bind a callback to the Sphere overlap delegates
-	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereBeginOverlap);
-	Sphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
+	Sphere->OnComponentBeginOverlap.AddUniqueDynamic(this, &AItem::OnSphereBeginOverlap);
+	Sphere->OnComponentEndOverlap.AddUniqueDynamic(this, &AItem::OnSphereEndOverlap);
 }
 
 void AItem::Tick(float DeltaTime) { 
