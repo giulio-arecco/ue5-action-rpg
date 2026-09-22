@@ -3,17 +3,24 @@
 #include "Characters/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 
-AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.0f), RunningTime(0.0f), ItemState(EItemState::EIS_Hovering) {
+AItem::AItem(): 
+	MovementAmplitude(10.0f), 
+	MovementPeriod(2.5f), 
+	StartLocation(0.0f), 
+	ItemState(EItemState::EIS_Hovering), 
+	RunningTime(0.0f)
+{
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	SetRootComponent(ItemMesh);
-
-	ItemMesh->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
-	ItemMesh->SetCollisionObjectType(ECC_WorldDynamic);
-	ItemMesh->SetCollisionResponseToAllChannels(ECR_Overlap);
-	ItemMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	// ItemMesh->SetCollisionObjectType(ECC_WorldDynamic);
+	// ItemMesh->SetCollisionResponseToAllChannels(ECR_Overlap);
+	// ItemMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("ItemSphere"));
 	Sphere->SetupAttachment(GetRootComponent());

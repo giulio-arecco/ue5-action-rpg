@@ -1,5 +1,7 @@
 ﻿#include "Items/Weapons/Weapon.h"
 
+#include "Components/SphereComponent.h"
+
 AWeapon::AWeapon() {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -24,6 +26,9 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocket) {
 	if (InParent != nullptr) {
 		const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 		ItemMesh->AttachToComponent(InParent, TransformRules, InSocket);
+		
+		GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
 		ItemState = EItemState::EIS_Equipped;
 	}
 }

@@ -51,7 +51,7 @@ protected:
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	double RunningTime;
-
+	
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;
 
@@ -59,4 +59,7 @@ private:
 	T Avg(T First, T Second) {
 		return (First + Second) / 2;
 	}
+	
+public:
+	FORCEINLINE USphereComponent* GetSphere() const { return Sphere; }
 };
