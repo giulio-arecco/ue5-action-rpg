@@ -20,10 +20,11 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	Super::OnSphereEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
-void AWeapon::Equip(USceneComponent* InParent, FName InSocket) const {
+void AWeapon::Equip(USceneComponent* InParent, FName InSocket) {
 	if (InParent != nullptr) {
 		const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 		ItemMesh->AttachToComponent(InParent, TransformRules, InSocket);
+		ItemState = EItemState::EIS_Equipped;
 	}
 }
 

@@ -6,6 +6,11 @@
 
 class USphereComponent;
 
+enum class EItemState : uint8 {
+	EIS_Hovering,
+	EIS_Equipped
+};
+
 UCLASS()
 class ACTIONRPGCOURSE_API AItem : public AActor {
 	GENERATED_BODY()
@@ -15,8 +20,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* ItemMesh;
 
@@ -28,6 +31,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sine Values")
 	FVector StartLocation;
+	
+	EItemState ItemState;
+	
+	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintPure)
 	float TransformedSin() const;

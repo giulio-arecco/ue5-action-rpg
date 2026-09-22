@@ -3,7 +3,7 @@
 #include "Characters/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 
-AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.0f), RunningTime(0.0f) {
+AItem::AItem(): MovementAmplitude(10.0f), MovementPeriod(2.5f), StartLocation(0.0f), RunningTime(0.0f), ItemState(EItemState::EIS_Hovering) {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -32,8 +32,11 @@ void AItem::BeginPlay() {
 
 void AItem::Tick(float DeltaTime) { 
 	Super::Tick(DeltaTime);
-
 	RunningTime += DeltaTime;
+	
+	if (ItemState == EItemState::EIS_Hovering) {
+		SetActorLocation(FVector(StartLocation.X, StartLocation.Y, StartLocation.Z + TransformedCos()));
+	}
 }
 
 float AItem::TransformedSin() const {
