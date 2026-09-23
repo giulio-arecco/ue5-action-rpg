@@ -1,6 +1,7 @@
 ﻿#include "Items/Weapons/Weapon.h"
 
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AWeapon::AWeapon() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -27,6 +28,10 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 		AttachMeshToSocket(InParent, InSocket);
 		GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		ItemState = EItemState::EIS_Equipped;
+		
+		if (EquipSound != nullptr) {
+			UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
+		}
 	}
 }
 
