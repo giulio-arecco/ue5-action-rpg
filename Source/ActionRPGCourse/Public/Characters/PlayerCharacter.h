@@ -6,6 +6,7 @@
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
 
+class AWeapon;
 class AItem;
 class UGroomComponent;
 class USpringArmComponent;
@@ -25,25 +26,6 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
-
-	/*************************
-	 *    Input Callbacks    *
-	 ************************/ 
-	
-	void MoveTriggered(const FInputActionValue& Value);
-	void LookTriggered(const FInputActionValue& Value);
-	void InteractTriggered();
-	void AttackTriggered();
-	
-	/*********************************
-	 *  Animation-related Functions  *
-	 ********************************/
-
-	void PlayAttackMontage() const;
-	bool CanAttack() const;
-
-	UFUNCTION(BlueprintCallable)
-	void OnAttackEndNotify();
 
 	/*****************************
 	 *  Input-related Variables  *
@@ -73,9 +55,15 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
 	FName WeaponHandSocketName;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	FName WeaponSpineSocketName;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Montages")
 	UAnimMontage* AttackMontage;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Montages")
+	UAnimMontage* EquipMontage;
 
 private:
 	UPROPERTY(VisibleInstanceOnly)
@@ -96,8 +84,43 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Hair")
 	UGroomComponent* Eyebrows;
 	
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY(VisibleInstanceOnly, Category = "Equipment")
 	AItem* OverlappingItem;
+	
+	UPROPERTY(VisibleInstanceOnly, Category = "Equipment")
+	AWeapon* EquippedWeapon;
+	
+	/*************************
+	 *    Input Callbacks    *
+	 ************************/ 
+	
+	void MoveTriggered(const FInputActionValue& Value);
+	void LookTriggered(const FInputActionValue& Value);
+	void InteractStarted();
+	void AttackStarted();
+	
+	/*********************************
+	 *  Animation-related Functions  *
+	 ********************************/
+
+	void PlayAttackMontage() const;
+	void PlayEquipMontage(FName SectionName) const;
+	
+	bool CanAttack() const;
+	bool CanArm() const;
+	bool CanDisarm() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void OnArmNotify() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void OnDisarmNotify() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void OnArmingEndNotify();
+
+	UFUNCTION(BlueprintCallable)
+	void OnAttackEndNotify();
 
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }

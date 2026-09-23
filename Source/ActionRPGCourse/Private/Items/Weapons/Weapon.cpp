@@ -22,14 +22,15 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	Super::OnSphereEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
-void AWeapon::Equip(USceneComponent* InParent, FName InSocket) {
+void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 	if (InParent != nullptr) {
-		const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-		ItemMesh->AttachToComponent(InParent, TransformRules, InSocket);
-		
+		AttachMeshToSocket(InParent, InSocket);
 		GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		
 		ItemState = EItemState::EIS_Equipped;
 	}
 }
 
+void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocket) const {
+	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+	ItemMesh->AttachToComponent(InParent, TransformRules, InSocket);
+}

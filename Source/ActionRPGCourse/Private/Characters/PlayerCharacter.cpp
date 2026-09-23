@@ -10,8 +10,9 @@
 
 APlayerCharacter::APlayerCharacter() : 
 	WeaponHandSocketName("hand_r_socket"), 
-	CharacterState(ECharacterState::ECS_Unequipped), 
-	ActionState(EActionState::EAS_Unoccupied) 
+	WeaponSpineSocketName("spine_socket"),
+	CharacterState(ECharacterState::ECS_Disarmed), 
+	ActionState(EActionState::EAS_Unoccupied)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -61,8 +62,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveTriggered);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookTriggered);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::InteractTriggered);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::AttackTriggered);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::InteractStarted);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::AttackStarted);
 		// We use the ACharacter::Jump function to handle jumping, since currently there's no need for a APlayerCharacter::JumpTriggered function 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -70,10 +71,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 }
 
 void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
-	if (ActionState == EActionState::EAS_Attacking) return;
+	if (ActionState != EActionState::EAS_Unoccupied) return;
 	
 	const FVector2D MovementVector = Value.Get<FVector2D>();
-
+	
 	if(GetController() != nullptr && MovementVector != FVector2D::ZeroVector) {
 		// Get the Controller yaw 
 		const FRotator ControlRotation = GetControlRotation();
@@ -100,16 +101,29 @@ void APlayerCharacter::LookTriggered(const FInputActionValue& Value) {
 	}
 }
 
-void APlayerCharacter::InteractTriggered() {
+void APlayerCharacter::InteractStarted() {
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	if (OverlappingWeapon != nullptr) {
 		OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName);
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+		CharacterState = ECharacterState::ECS_Armed;
+		EquippedWeapon = OverlappingWeapon;
 		OverlappingItem = nullptr;
+	}
+	else {
+		if (CanArm()) {
+			ActionState = EActionState::EAS_ArmingOrDisarming;
+			PlayEquipMontage(FName("Equip"));
+			CharacterState = ECharacterState::ECS_Armed;
+		}
+		else if (CanDisarm()) {
+			ActionState = EActionState::EAS_ArmingOrDisarming;
+			PlayEquipMontage(FName("Unequip"));
+			CharacterState = ECharacterState::ECS_Disarmed;
+		}
 	}
 }
 
-void APlayerCharacter::AttackTriggered() {
+void APlayerCharacter::AttackStarted() {
 	if (CanAttack()) {
 		ActionState = EActionState::EAS_Attacking;
 		PlayAttackMontage();
@@ -117,8 +131,19 @@ void APlayerCharacter::AttackTriggered() {
 }
 
 bool APlayerCharacter::CanAttack() const {
-	return CharacterState != ECharacterState::ECS_Unequipped &&
+	return CharacterState == ECharacterState::ECS_Armed &&
 		ActionState == EActionState::EAS_Unoccupied;
+}
+
+bool APlayerCharacter::CanArm() const {
+	return ActionState == EActionState::EAS_Unoccupied &&
+		CharacterState == ECharacterState::ECS_Disarmed &&
+		EquippedWeapon != nullptr;
+}
+
+bool APlayerCharacter::CanDisarm() const {
+	return ActionState == EActionState::EAS_Unoccupied &&
+		CharacterState == ECharacterState::ECS_Armed;
 }
 
 void APlayerCharacter::PlayAttackMontage() const {
@@ -135,11 +160,31 @@ void APlayerCharacter::PlayAttackMontage() const {
 			SectionName = FName("Attack2");
 			break;
 		default:
-			UE_LOG(LogTemp, Error, TEXT("APlayerCharacter::AttackTriggered - Invalid Montage Section"));
+			UE_LOG(LogTemp, Error, TEXT("APlayerCharacter::AttackStarted - Invalid Montage Section"));
 		}
 
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 	}
+}
+
+void APlayerCharacter::PlayEquipMontage(FName SectionName) const {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr && EquipMontage != nullptr) {
+		AnimInstance->Montage_Play(EquipMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
+	}
+}
+
+void APlayerCharacter::OnArmNotify() const {
+	EquippedWeapon->AttachMeshToSocket(GetMesh(), WeaponHandSocketName);
+}
+
+void APlayerCharacter::OnDisarmNotify() const {
+	EquippedWeapon->AttachMeshToSocket(GetMesh(), WeaponSpineSocketName);
+}
+
+void APlayerCharacter::OnArmingEndNotify() {
+	ActionState = EActionState::EAS_Unoccupied;
 }
 
 void APlayerCharacter::OnAttackEndNotify() {
