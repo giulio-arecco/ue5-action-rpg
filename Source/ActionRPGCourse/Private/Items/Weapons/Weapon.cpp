@@ -1,10 +1,13 @@
 ﻿#include "Items/Weapons/Weapon.h"
 
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AWeapon::AWeapon() {
-	PrimaryActorTick.bCanEverTick = true;
+	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
+	Box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Box->SetupAttachment(GetRootComponent());
 }
 
 void AWeapon::BeginPlay() {
@@ -26,7 +29,10 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 	if (InParent != nullptr) {
 		AttachMeshToSocket(InParent, InSocket);
+		
 		GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		
 		ItemState = EItemState::EIS_Equipped;
 		
 		if (EquipSound != nullptr) {
