@@ -4,26 +4,29 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-AWeapon::AWeapon() {
-	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
-	Box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	Box->SetupAttachment(GetRootComponent());
+AWeapon::AWeapon():
+	BoxTraceHalfSize(5.0f, 5.0f, 5.0f)
+{
+	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
+	WeaponBox->SetupAttachment(GetRootComponent());
+	
+	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponBox->SetCollisionResponseToAllChannels(ECR_Overlap);
+	WeaponBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+
+	BoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponBoxTraceStart"));
+	BoxTraceStart->SetupAttachment(GetRootComponent());
+	BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponBoxTraceEnd"));
+	BoxTraceEnd->SetupAttachment(GetRootComponent());
 }
 
 void AWeapon::BeginPlay() {
 	Super::BeginPlay();
+	WeaponBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWeapon::OnBoxBeginOverlap);
 }
 
 void AWeapon::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-}
-
-void AWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-}
-
-void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-	Super::OnSphereEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 }
 
 void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
@@ -31,7 +34,7 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 		AttachMeshToSocket(InParent, InSocket);
 		
 		GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		WeaponBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		
 		ItemState = EItemState::EIS_Equipped;
 		
@@ -44,4 +47,33 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocket) const {
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	ItemMesh->AttachToComponent(InParent, TransformRules, InSocket);
+}
+
+void AWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+}
+
+void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+	Super::OnSphereEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
+}
+
+void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	const FVector Start = BoxTraceStart->GetComponentLocation();
+	const FVector End = BoxTraceEnd->GetComponentLocation();
+	
+	FHitResult HitResult;
+	const TArray<AActor*> ActorsToIgnore;
+	UKismetSystemLibrary::BoxTraceSingle(
+		this,
+		Start,
+		End,
+		BoxTraceHalfSize,
+		BoxTraceStart->GetComponentRotation(),
+		TraceTypeQuery1,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::ForDuration,
+		HitResult,
+		true
+	);
 }
