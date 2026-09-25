@@ -175,19 +175,25 @@ void APlayerCharacter::PlayEquipMontage(FName SectionName) const {
 	}
 }
 
-void APlayerCharacter::OnArmNotify() const {
+void APlayerCharacter::AttachWeaponToHand() const {
 	EquippedWeapon->AttachMeshToSocket(GetMesh(), WeaponHandSocketName);
 }
 
-void APlayerCharacter::OnDisarmNotify() const {
+void APlayerCharacter::AttachWeaponToSpine() const {
 	EquippedWeapon->AttachMeshToSocket(GetMesh(), WeaponSpineSocketName);
 }
 
-void APlayerCharacter::OnArmingEndNotify() {
-	ActionState = EActionState::EAS_Unoccupied;
-}
+// void APlayerCharacter::OnArmingEndNotify() {
+// 	ActionState = EActionState::EAS_Unoccupied;
+// }
+//
+// void APlayerCharacter::OnAttackEndNotify() {
+// 	ActionState = EActionState::EAS_Unoccupied;
+// }
 
-void APlayerCharacter::OnAttackEndNotify() {
-	ActionState = EActionState::EAS_Unoccupied;
+void APlayerCharacter::SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const {
+	if (EquippedWeapon != nullptr) {
+		EquippedWeapon->SetWeaponBoxCollisionEnabled(CollisionEnabled);
+	}
 }
 

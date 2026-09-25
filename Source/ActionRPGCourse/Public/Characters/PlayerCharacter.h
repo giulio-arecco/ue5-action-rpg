@@ -111,22 +111,20 @@ private:
 	bool CanDisarm() const;
 	
 	UFUNCTION(BlueprintCallable)
-	void OnArmNotify() const;
+	void AttachWeaponToHand() const;
 	
 	UFUNCTION(BlueprintCallable)
-	void OnDisarmNotify() const;
+	void AttachWeaponToSpine() const;
 	
 	UFUNCTION(BlueprintCallable)
-	void OnArmingEndNotify();
-
-	UFUNCTION(BlueprintCallable)
-	void OnAttackEndNotify();
-
+	void SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 	
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 	
 	FORCEINLINE EActionState GetActionState() const { return ActionState; }
+	
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetActionState(EActionState State) { ActionState = State; }
 };

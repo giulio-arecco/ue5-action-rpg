@@ -13,9 +13,13 @@ class ACTIONRPGCOURSE_API AWeapon : public AItem {
 
 public:
 	AWeapon();
+	
 	virtual void Tick(float DeltaTime) override;
+	
 	void Equip(USceneComponent* InParent, const FName& InSocket);
 	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocket) const;
+	
+	FORCEINLINE void SetWeaponBoxCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Box Trace")

@@ -32,10 +32,7 @@ void AWeapon::Tick(float DeltaTime) {
 void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 	if (InParent != nullptr) {
 		AttachMeshToSocket(InParent, InSocket);
-		
 		GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		WeaponBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		
 		ItemState = EItemState::EIS_Equipped;
 		
 		if (EquipSound != nullptr) {
@@ -47,6 +44,12 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocket) const {
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
 	ItemMesh->AttachToComponent(InParent, TransformRules, InSocket);
+}
+
+void AWeapon::SetWeaponBoxCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const {
+	if (WeaponBox != nullptr) {
+		WeaponBox->SetCollisionEnabled(CollisionEnabled);
+	}
 }
 
 void AWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
