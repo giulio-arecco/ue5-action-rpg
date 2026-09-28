@@ -29,35 +29,7 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 }
 
 void AEnemy::GetHit(const FVector& ImpactPoint) {
-	const FVector Location = GetActorLocation();
-	const FVector Up = GetActorUpVector();
-	const FVector Forward = GetActorForwardVector(); // already normalized
-	const FVector ToHit = FVector::VectorPlaneProject(ImpactPoint - Location, Up).GetSafeNormal();
-	
-	if (ToHit.IsNearlyZero()) return;
-	
-	const FVector Cross = FVector::CrossProduct(Forward, ToHit);
-	// Since Cross is aligned with Up and Up is a unit vector, their dot product is: 
-	// |Cross| * |Up| * cosAlpha = |Cross| * 1 * (+-1) = +-|Cross|
-	// and the sign information is needed for Atan2
-	const double SinTheta = FVector::DotProduct(Cross, Up);
-	const double CosTheta = FVector::DotProduct(Forward, ToHit);
-	
-	// We use Atan2 instead of Acos or Atan because:
-	// 1. It eliminates division-by-zero: standard atan(y/x) breaks when CosTheta == 0;
-	//    Atan2 safely inspects both coordinates natively without explicit division.
-	// 2. Immune to float drift NaNs: Acos produces NaN if DotProduct exceeds slightly 1.0 due to precision drift;
-	//    Atan2 is well-defined across all real coordinate pairs (x, y) != (0, 0).
-	// 3. Polar numerical stability: Acos derivative diverges to infinity at 0° (x = 1) and 180° (x = -1), exaggerating small errors,
-	//    whereas Atan2 provides uniform numerical accuracy around the entire circle.
-	const double Theta = FMath::RadiansToDegrees(FMath::Atan2(SinTheta, CosTheta));
-	
-	// if (GEngine != nullptr) {
-	// 	GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, FString::Printf(TEXT("Theta: %.2f"), Theta));
-	// }
-	// UKismetSystemLibrary::DrawDebugArrow(this, Location, Location + Forward * 75.0f, 5.0f, FLinearColor::Red, 5.0f);
-	// UKismetSystemLibrary::DrawDebugArrow(this, Location, Location + ToHit * 75.0f, 5.0f, FLinearColor::Green, 5.0f);
-	// UKismetSystemLibrary::DrawDebugArrow(this, Location, Location + Cross * 75.0f, 5.0f, FLinearColor::Blue, 5.0f);
+	const double Theta = ComputeAngleToImpact(ImpactPoint);
 	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance != nullptr && HitReactMontage != nullptr) {
@@ -80,5 +52,30 @@ void AEnemy::GetHit(const FVector& ImpactPoint) {
 		
 		AnimInstance->Montage_JumpToSection(Section);
 	}
+}
+
+double AEnemy::ComputeAngleToImpact(const FVector& ImpactPoint) const {
+	const FVector Location = GetActorLocation();
+	const FVector Up = GetActorUpVector();
+	const FVector ToHit = FVector::VectorPlaneProject(ImpactPoint - Location, Up).GetSafeNormal();
+	
+	if (ToHit.IsNearlyZero()) return 0.0;
+	
+	const FVector Forward = GetActorForwardVector(); // already normalized
+	const FVector Cross = FVector::CrossProduct(Forward, ToHit);
+	// Since Cross is aligned with Up and Up is a unit vector, their dot product is: 
+	// |Cross| * |Up| * cosAlpha = |Cross| * 1 * (±1) = ±|Cross|
+	// and the sign information is needed for Atan2
+	const double SinTheta = FVector::DotProduct(Cross, Up);
+	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	
+	// We use Atan2 over Acos or Atan because:
+	// 1. Eliminates division-by-zero: standard atan(y/x) breaks when CosTheta == 0;
+	//    Atan2 safely inspects both coordinates natively without explicit division.
+	// 2. Immune to float drift NaNs: Acos produces NaN if DotProduct exceeds 1.0 due to precision drift;
+	//    Atan2 is well-defined across all real coordinate pairs (x, y) != (0, 0).
+	// 3. Polar numerical stability: Acos derivative diverges to infinity at 0° (x = 1) and 180° (x = -1), exaggerating small errors,
+	//    whereas Atan2 provides uniform numerical accuracy around the entire circle
+	return FMath::RadiansToDegrees(FMath::Atan2(SinTheta, CosTheta));
 }
 

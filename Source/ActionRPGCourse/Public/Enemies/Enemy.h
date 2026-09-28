@@ -25,4 +25,6 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Animation|Montages")
 	UAnimMontage* HitReactMontage;
+	
+	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
 };
