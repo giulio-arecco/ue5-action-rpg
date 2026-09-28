@@ -20,6 +20,7 @@ public:
 	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocket) const;
 	
 	FORCEINLINE void SetWeaponBoxCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
+	FORCEINLINE void EmptyActorsToIgnore() { ActorsToIgnore.Empty(); }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Box Trace")
@@ -44,4 +45,7 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Box Trace")
 	USceneComponent* BoxTraceEnd;
+	
+	UPROPERTY(VisibleInstanceOnly, Category = "Weapon Box Trace")
+	TArray<AActor*> ActorsToIgnore;
 };

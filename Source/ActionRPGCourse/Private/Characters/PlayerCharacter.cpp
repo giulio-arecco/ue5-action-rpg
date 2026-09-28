@@ -186,6 +186,7 @@ void APlayerCharacter::AttachWeaponToSpine() const {
 void APlayerCharacter::SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const {
 	if (EquippedWeapon != nullptr) {
 		EquippedWeapon->SetWeaponBoxCollisionEnabled(CollisionEnabled);
+		EquippedWeapon->EmptyActorsToIgnore();
 	}
 }
 
