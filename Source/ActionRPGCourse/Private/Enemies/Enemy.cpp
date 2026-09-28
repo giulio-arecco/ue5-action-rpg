@@ -27,3 +27,6 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void AEnemy::GetHit() {
+}
+
