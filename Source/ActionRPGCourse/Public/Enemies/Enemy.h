@@ -15,7 +15,7 @@ public:
 	AEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void GetHit(const FVector& ImpactPoint) override;
+	virtual void GetHit(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -26,6 +26,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	USoundBase* HitSound;
+	
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* HitParticles;
 	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;

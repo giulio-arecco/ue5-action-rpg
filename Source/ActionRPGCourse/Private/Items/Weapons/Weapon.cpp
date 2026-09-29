@@ -75,14 +75,14 @@ void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 		TraceTypeQuery1,
 		false,
 		ActorsToIgnore,
-		EDrawDebugTrace::ForDuration,
+		EDrawDebugTrace::None,
 		HitResult,
 		true
 	);
 	
 	AActor* HitActor = HitResult.GetActor();
 	if (IHitInterface* HitInterface = Cast<IHitInterface>(HitActor); HitInterface != nullptr) {
-		HitInterface->GetHit(HitResult.ImpactPoint);
+		HitInterface->GetHit(HitResult.ImpactPoint, HitResult.ImpactNormal);
 		ActorsToIgnore.AddUnique(HitActor);
 	}
 }

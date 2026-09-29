@@ -29,11 +29,15 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AEnemy::GetHit(const FVector& ImpactPoint) {
+void AEnemy::GetHit(const FVector& ImpactPoint, const FVector& ImpactNormal) {
 	PlayHitReactMontage(ImpactPoint);
 	
 	if (HitSound != nullptr) {
 		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
+	}
+	
+	if (HitParticles != nullptr) {
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticles, ImpactPoint, ImpactNormal.Rotation());
 	}
 }
 
