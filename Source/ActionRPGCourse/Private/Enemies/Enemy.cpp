@@ -1,5 +1,6 @@
 ﻿#include "Enemies/Enemy.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 AEnemy::AEnemy() {
@@ -29,11 +30,18 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 }
 
 void AEnemy::GetHit(const FVector& ImpactPoint) {
+	PlayHitReactMontage(ImpactPoint);
+	
+	if (HitSound != nullptr) {
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
+	}
+}
+
+void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
 	const double Theta = ComputeAngleToImpact(ImpactPoint);
 	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance != nullptr && HitReactMontage != nullptr) {
-		
 		AnimInstance->Montage_Play(HitReactMontage);
 		
 		FName Section;

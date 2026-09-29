@@ -7,8 +7,6 @@
 #include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
 
-class UAnimMontage;
-
 UCLASS()
 class ACTIONRPGCOURSE_API AEnemy : public ACharacter, public IHitInterface {
 	GENERATED_BODY()
@@ -26,5 +24,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Animation|Montages")
 	UAnimMontage* HitReactMontage;
 	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* HitSound;
+	
+	void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
 };
