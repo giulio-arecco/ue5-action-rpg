@@ -10,9 +10,6 @@ class UHitInterface : public UInterface {
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class ACTIONRPGCOURSE_API IHitInterface {
 	GENERATED_BODY()
 
