@@ -21,7 +21,7 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* ItemMesh;
+	TObjectPtr<UStaticMeshComponent> ItemMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Values")
 	float MovementAmplitude;
@@ -53,7 +53,7 @@ private:
 	double RunningTime;
 	
 	UPROPERTY(VisibleAnywhere)
-	USphereComponent* Sphere;
+	TObjectPtr<USphereComponent> Sphere;
 
 	template<typename T>
 	T Avg(T First, T Second) {

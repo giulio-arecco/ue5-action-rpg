@@ -17,7 +17,7 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly)
-	UGeometryCollectionComponent* GeometryCollection;
+	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float LifeSpanAfterBreak;
@@ -26,7 +26,7 @@ protected:
 	
 private:
 	UPROPERTY(EditAnywhere)
-	USoundBase* BreakSound;
+	TObjectPtr<USoundBase> BreakSound;
 	
 	UFUNCTION()
 	void OnBreak(const FChaosBreakEvent& BreakEvent);

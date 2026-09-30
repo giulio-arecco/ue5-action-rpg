@@ -22,13 +22,13 @@ protected:
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Animation|Montages")
-	UAnimMontage* HitReactMontage;
+	TObjectPtr<UAnimMontage> HitReactMontage;
 	
 	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundBase* HitSound;
+	TObjectPtr<USoundBase> HitSound;
 	
 	UPROPERTY(EditAnywhere)
-	UParticleSystem* HitParticles;
+	TObjectPtr<UParticleSystem> HitParticles;
 	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;

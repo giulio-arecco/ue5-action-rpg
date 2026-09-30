@@ -38,16 +38,16 @@ protected:
 	
 private:
 	UPROPERTY(EditAnywhere)
-	USoundBase* EquipSound;
+	TObjectPtr<USoundBase> EquipSound;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Box Trace")
-	UBoxComponent* WeaponBox;
+	TObjectPtr<UBoxComponent> WeaponBox;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Box Trace")
-	USceneComponent* BoxTraceStart;
+	TObjectPtr<USceneComponent> BoxTraceStart;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Box Trace")
-	USceneComponent* BoxTraceEnd;
+	TObjectPtr<USceneComponent> BoxTraceEnd;
 	
 	UPROPERTY(VisibleInstanceOnly, Category = "Weapon Box Trace")
 	TArray<AActor*> ActorsToIgnore;

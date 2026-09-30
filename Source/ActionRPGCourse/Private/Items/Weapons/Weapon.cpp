@@ -83,12 +83,8 @@ void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 	if (!HitSomething) return;
 	
 	AActor* HitActor = BoxHit.GetActor();
-	if (const IHitInterface* HitInterface = Cast<IHitInterface>(HitActor); HitInterface != nullptr) {
-		if (GEngine != nullptr) {
-			GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Red,FString::Printf(TEXT("Hit Actor: %s"), *HitActor->GetName()));
-		}
-		
-		HitInterface->Execute_GetHit(HitActor, BoxHit.ImpactPoint, BoxHit.ImpactNormal);
+	if (HitActor != nullptr && HitActor->Implements<UHitInterface>()) {
+		IHitInterface::Execute_GetHit(HitActor, BoxHit.ImpactPoint, BoxHit.ImpactNormal);
 		ActorsToIgnore.AddUnique(HitActor);
 	}
 	

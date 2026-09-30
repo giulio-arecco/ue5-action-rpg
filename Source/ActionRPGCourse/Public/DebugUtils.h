@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 
 struct ACTIONRPGCOURSE_API FDebugUtils {
-public:
 	static void DrawSphere(const UWorld* World, const FVector& Center, float Radius);
 	static void DrawSphereSingleFrame(const UWorld* World, const FVector& Center, float Radius);
 	static void DrawLine(const UWorld* World, const FVector& Start, const FVector& End);

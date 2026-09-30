@@ -15,10 +15,10 @@ class ACTIONRPGCOURSE_API UPlayerAnimInstance : public UAnimInstance {
 
 public:
 	UPROPERTY(BlueprintReadOnly)
-	APlayerCharacter* PlayerCharacter;
+	TObjectPtr<APlayerCharacter> PlayerCharacter;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
-	UCharacterMovementComponent* PlayerCharacterMovement;
+	TObjectPtr<UCharacterMovementComponent> PlayerCharacterMovement;
 
 	UPROPERTY(BlueprintReadOnly)
 	ECharacterState CharacterState;
