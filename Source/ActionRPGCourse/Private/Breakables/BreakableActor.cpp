@@ -1,9 +1,10 @@
 ﻿#include "Breakables/BreakableActor.h"
 
 #include "GeometryCollection/GeometryCollectionComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ABreakableActor::ABreakableActor():
-	LifeSpanAfterBreak(15.0f)
+	LifeSpanAfterBreak(20.0f)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -11,12 +12,19 @@ ABreakableActor::ABreakableActor():
 	SetRootComponent(GeometryCollection);
 	GeometryCollection->SetGenerateOverlapEvents(true);
 	GeometryCollection->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GeometryCollection->SetNotifyBreaks(true);
 }
 
 void ABreakableActor::BeginPlay() {
 	Super::BeginPlay();
+	GeometryCollection->OnChaosBreakEvent.AddUniqueDynamic(this, &ABreakableActor::OnBreak);
 }
 
 void ABreakableActor::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	UGameplayStatics::PlaySoundAtLocation(this, BreakSound, ImpactPoint);
+}
+
+void ABreakableActor::OnBreak(const FChaosBreakEvent& BreakEvent) {
+	SetLifeSpan(LifeSpanAfterBreak);
 }
 

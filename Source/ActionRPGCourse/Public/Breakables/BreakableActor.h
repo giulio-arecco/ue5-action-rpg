@@ -3,7 +3,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/HitInterface.h"
+#include "Physics/Experimental/ChaosEventType.h"
 #include "BreakableActor.generated.h"
+
 
 UCLASS()
 class ACTIONRPGCOURSE_API ABreakableActor : public AActor, public IHitInterface {
@@ -21,4 +23,11 @@ protected:
 	float LifeSpanAfterBreak;
 	
 	virtual void BeginPlay() override;
+	
+private:
+	UPROPERTY(EditAnywhere)
+	USoundBase* BreakSound;
+	
+	UFUNCTION()
+	void OnBreak(const FChaosBreakEvent& BreakEvent);
 };
