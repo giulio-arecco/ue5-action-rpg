@@ -29,7 +29,7 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AEnemy::GetHit(const FVector& ImpactPoint, const FVector& ImpactNormal) {
+void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
 	PlayHitReactMontage(ImpactPoint);
 	
 	if (HitSound != nullptr) {

@@ -2,7 +2,9 @@
 
 #include "GeometryCollection/GeometryCollectionComponent.h"
 
-ABreakableActor::ABreakableActor() {
+ABreakableActor::ABreakableActor():
+	LifeSpanAfterBreak(15.0f)
+{
 	PrimaryActorTick.bCanEverTick = false;
 
 	GeometryCollection = CreateDefaultSubobject<UGeometryCollectionComponent>(TEXT("BreakableActorGeometryCollection"));
@@ -15,6 +17,6 @@ void ABreakableActor::BeginPlay() {
 	Super::BeginPlay();
 }
 
-void ABreakableActor::GetHit(const FVector& ImpactPoint, const FVector& ImpactNormal) {
+void ABreakableActor::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
 }
 

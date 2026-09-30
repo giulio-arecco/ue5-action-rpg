@@ -15,5 +15,6 @@ class ACTIONRPGCOURSE_API IHitInterface {
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void GetHit(const FVector& ImpactPoint, const FVector& ImpactNormal) = 0;
+	UFUNCTION(BlueprintNativeEvent)
+	void GetHit(const FVector& ImpactPoint, const FVector& ImpactNormal);
 };

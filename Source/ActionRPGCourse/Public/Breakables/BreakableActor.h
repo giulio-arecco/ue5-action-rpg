@@ -11,12 +11,14 @@ class ACTIONRPGCOURSE_API ABreakableActor : public AActor, public IHitInterface 
 
 public:
 	ABreakableActor();
-	virtual void GetHit(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
+	virtual void GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 
 protected:
-	virtual void BeginPlay() override;
-
-private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BLueprintReadOnly)
 	UGeometryCollectionComponent* GeometryCollection;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float LifeSpanAfterBreak;
+	
+	virtual void BeginPlay() override;
 };
