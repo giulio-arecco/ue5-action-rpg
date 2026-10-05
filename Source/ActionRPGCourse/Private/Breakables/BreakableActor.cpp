@@ -1,6 +1,7 @@
 ﻿#include "Breakables/BreakableActor.h"
 
 #include "GeometryCollection/GeometryCollectionComponent.h"
+#include "Items/Treasure.h"
 #include "Kismet/GameplayStatics.h"
 
 ABreakableActor::ABreakableActor():
@@ -25,6 +26,17 @@ void ABreakableActor::GetHit_Implementation(const FVector& ImpactPoint, const FV
 }
 
 void ABreakableActor::OnBreak(const FChaosBreakEvent& BreakEvent) {
+	// Disable break notifies to avoid responding to subsequent breaks into sub pieces
+	GeometryCollection->SetNotifyBreaks(false);
+	GeometryCollection->OnChaosBreakEvent.RemoveDynamic(this, &ABreakableActor::OnBreak);
+	
 	SetLifeSpan(LifeSpanAfterBreak);
+	
+	UWorld* World = GetWorld();
+	if (World != nullptr && TreasureClass != nullptr) {
+		FVector Location = GetActorLocation();
+		Location.Z += 50.0;
+		World->SpawnActor<ATreasure>(TreasureClass, Location, FRotator::ZeroRotator);
+	}
 }
 

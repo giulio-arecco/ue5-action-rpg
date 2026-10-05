@@ -6,6 +6,7 @@
 
 ATreasure::ATreasure() {
 	PrimaryActorTick.bCanEverTick = true;
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ATreasure::BeginPlay() {

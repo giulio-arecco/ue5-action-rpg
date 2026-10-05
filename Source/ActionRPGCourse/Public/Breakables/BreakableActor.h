@@ -7,6 +7,8 @@
 #include "BreakableActor.generated.h"
 
 
+class ATreasure;
+
 UCLASS()
 class ACTIONRPGCOURSE_API ABreakableActor : public AActor, public IHitInterface {
 	GENERATED_BODY()
@@ -19,15 +21,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly)
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Break Properties")
 	float LifeSpanAfterBreak;
 	
 	virtual void BeginPlay() override;
 	
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Break Properties")
 	TObjectPtr<USoundBase> BreakSound;
 	
-	UFUNCTION()
+	UFUNCTION(Category = "Break Properties")
 	void OnBreak(const FChaosBreakEvent& BreakEvent);
+	
+	UPROPERTY(EditAnywhere, Category = "Break Properties")
+	TSubclassOf<ATreasure> TreasureClass;
 };
