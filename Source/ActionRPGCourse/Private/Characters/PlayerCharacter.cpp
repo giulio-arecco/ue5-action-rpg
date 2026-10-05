@@ -143,7 +143,8 @@ bool APlayerCharacter::CanArm() const {
 
 bool APlayerCharacter::CanDisarm() const {
 	return ActionState == EActionState::EAS_Unoccupied &&
-		CharacterState == ECharacterState::ECS_Armed;
+		CharacterState == ECharacterState::ECS_Armed &&
+		EquippedWeapon != nullptr;
 }
 
 void APlayerCharacter::PlayAttackMontage() const {
