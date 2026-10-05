@@ -19,4 +19,7 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Sounds")
 	TObjectPtr<USoundBase> PickupSound;
+	
+	UPROPERTY(EditAnywhere)
+	float RotationRate;
 };

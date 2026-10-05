@@ -4,7 +4,9 @@
 #include "Kismet/GameplayStatics.h"
 
 
-ATreasure::ATreasure() {
+ATreasure::ATreasure():
+	RotationRate(45.0f)
+{
 	PrimaryActorTick.bCanEverTick = true;
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
@@ -26,5 +28,6 @@ void ATreasure::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void ATreasure::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+	AddActorWorldRotation(FRotator(0.0, RotationRate * DeltaTime, 0.0));
 }
 
