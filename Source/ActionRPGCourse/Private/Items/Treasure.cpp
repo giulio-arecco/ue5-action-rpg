@@ -5,7 +5,8 @@
 
 
 ATreasure::ATreasure():
-	RotationRate(45.0f)
+	RotationRate(45.0f),
+	GoldAmount(5.0f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);

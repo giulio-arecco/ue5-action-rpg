@@ -21,6 +21,27 @@ void ABreakableActor::BeginPlay() {
 	GeometryCollection->OnChaosBreakEvent.AddUniqueDynamic(this, &ABreakableActor::OnBreak);
 }
 
+#if WITH_EDITOR
+void ABreakableActor::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) {
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	
+	const FName PropertyName = PropertyChangedEvent.GetPropertyName();
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(ABreakableActor, TreasureClassArray)) {
+		TreasureClassArray.Sort([] (const TSubclassOf<ATreasure>& A, const TSubclassOf<ATreasure>& B) {
+			const UClass* ClassA = A.Get();
+			const UClass* ClassB = B.Get();
+			
+			// If either A or B is null, push nulls to the back
+			if (ClassA == nullptr || ClassB == nullptr) {
+				return ClassA != nullptr;
+			}
+			
+			return ClassA->GetDefaultObject<ATreasure>()->GetGoldAmount() < ClassB->GetDefaultObject<ATreasure>()->GetGoldAmount();
+		});
+	}
+}
+#endif
+
 void ABreakableActor::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
 	UGameplayStatics::PlaySoundAtLocation(this, BreakSound, ImpactPoint);
 }
@@ -33,10 +54,12 @@ void ABreakableActor::OnBreak(const FChaosBreakEvent& BreakEvent) {
 	SetLifeSpan(LifeSpanAfterBreak);
 	
 	UWorld* World = GetWorld();
-	if (World != nullptr && TreasureClass != nullptr) {
+	if (World != nullptr && !TreasureClassArray.IsEmpty()) {
 		FVector Location = GetActorLocation();
 		Location.Z += 50.0;
-		World->SpawnActor<ATreasure>(TreasureClass, Location, FRotator::ZeroRotator);
+		
+		const int32 Roll = FMath::RandRange(0, TreasureClassArray.Num() - 1);
+		World->SpawnActor<ATreasure>(TreasureClassArray[Roll], Location, FRotator::ZeroRotator);
 	}
 }
 
