@@ -7,6 +7,8 @@
 #include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
 
+class UAttributeComponent;
+
 UCLASS()
 class ACTIONRPGCOURSE_API AEnemy : public ACharacter, public IHitInterface {
 	GENERATED_BODY()
@@ -29,6 +31,9 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UParticleSystem> HitParticles;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UAttributeComponent> Attributes;
 	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;

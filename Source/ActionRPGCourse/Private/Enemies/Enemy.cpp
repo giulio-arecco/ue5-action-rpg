@@ -1,10 +1,13 @@
 ﻿#include "Enemies/Enemy.h"
+
+#include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 AEnemy::AEnemy() {
 	PrimaryActorTick.bCanEverTick = true;
+	
+	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
 
 	USkeletalMeshComponent* Skm = GetMesh();
 	Skm->SetCollisionObjectType(ECC_WorldDynamic);
@@ -12,7 +15,7 @@ AEnemy::AEnemy() {
 	Skm->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	Skm->SetGenerateOverlapEvents(true);	
 	
-	UCapsuleComponent*  Capsule = GetCapsuleComponent();
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
 	Capsule->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	Capsule->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
