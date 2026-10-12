@@ -7,9 +7,10 @@
 class UNiagaraComponent;
 class USphereComponent;
 
+UENUM(BlueprintType)
 enum class EItemState : uint8 {
-	EIS_Hovering,
-	EIS_Equipped
+	EIS_Hovering UMETA(DisplayName = "Hovering"),
+	EIS_Equipped UMETA(DisplayName = "Equipped")
 };
 
 UCLASS()
@@ -21,8 +22,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	FORCEINLINE USphereComponent* GetSphere() const { return Sphere; }
-	FORCEINLINE UNiagaraComponent* GetPickupParticles() const {return PickupParticles; }
-	FORCEINLINE void SetPickupParticles(UNiagaraComponent* NiagaraComponent) { PickupParticles = NiagaraComponent; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -37,9 +36,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sine Values")
 	FVector StartLocation;
 	
+	UPROPERTY(VisibleInstanceOnly)
 	EItemState ItemState;
 	
 	virtual void BeginPlay() override;
+	void DeactivatePickupVFX() const;
 
 	UFUNCTION(BlueprintPure)
 	float TransformedSin() const;
@@ -60,7 +61,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> Sphere;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UNiagaraComponent> PickupParticles;
 
 	template<typename T>

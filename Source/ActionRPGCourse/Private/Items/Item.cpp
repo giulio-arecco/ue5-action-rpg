@@ -50,6 +50,12 @@ void AItem::Tick(float DeltaTime) {
 	}
 }
 
+void AItem::DeactivatePickupVFX() const {
+	if (PickupParticles != nullptr) {
+		PickupParticles->Deactivate();
+	}
+}
+
 float AItem::TransformedSin() const {
 	return MovementAmplitude * FMath::Sin(RunningTime * 2 * UE_PI / MovementPeriod);
 }

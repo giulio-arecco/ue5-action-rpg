@@ -41,10 +41,7 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 			UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
 		}
 		
-		UNiagaraComponent* NiagaraPickupParticles = GetPickupParticles();
-		if (NiagaraPickupParticles != nullptr) {
-			NiagaraPickupParticles->Deactivate();
-		}
+		DeactivatePickupVFX();
 	}
 }
 
