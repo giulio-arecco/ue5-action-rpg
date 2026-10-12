@@ -1,5 +1,6 @@
 ﻿#include "Items/Weapons/Weapon.h"
 
+#include "NiagaraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Interfaces/HitInterface.h"
@@ -38,6 +39,11 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
 		
 		if (EquipSound != nullptr) {
 			UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
+		}
+		
+		UNiagaraComponent* NiagaraPickupParticles = GetPickupParticles();
+		if (NiagaraPickupParticles != nullptr) {
+			NiagaraPickupParticles->Deactivate();
 		}
 	}
 }

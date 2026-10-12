@@ -1,5 +1,6 @@
 #include "Items/Item.h"
 
+#include "NiagaraComponent.h"
 #include "Characters/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 
@@ -25,6 +26,9 @@ AItem::AItem():
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("ItemSphere"));
 	Sphere->SetupAttachment(GetRootComponent());
 	Sphere->SetSphereRadius(150.0f);
+	
+	PickupParticles = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ItemNiagaraPickup"));
+	PickupParticles->SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay() {

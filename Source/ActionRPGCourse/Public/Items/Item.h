@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class UNiagaraComponent;
 class USphereComponent;
 
 enum class EItemState : uint8 {
@@ -18,6 +19,10 @@ class ACTIONRPGCOURSE_API AItem : public AActor {
 public:	
 	AItem();
 	virtual void Tick(float DeltaTime) override;
+	
+	FORCEINLINE USphereComponent* GetSphere() const { return Sphere; }
+	FORCEINLINE UNiagaraComponent* GetPickupParticles() const {return PickupParticles; }
+	FORCEINLINE void SetPickupParticles(UNiagaraComponent* NiagaraComponent) { PickupParticles = NiagaraComponent; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -54,12 +59,12 @@ private:
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> Sphere;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UNiagaraComponent> PickupParticles;
 
 	template<typename T>
 	T Avg(T First, T Second) {
 		return (First + Second) / 2;
 	}
-	
-public:
-	FORCEINLINE USphereComponent* GetSphere() const { return Sphere; }
 };
