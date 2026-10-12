@@ -7,6 +7,7 @@
 #include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
 
+class UWidgetComponent;
 class UAttributeComponent;
 
 UCLASS()
@@ -34,6 +35,9 @@ private:
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes;
+		
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UWidgetComponent> HealthBarWidget;
 	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;

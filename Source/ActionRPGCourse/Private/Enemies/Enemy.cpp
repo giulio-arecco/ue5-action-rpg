@@ -2,12 +2,16 @@
 
 #include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AEnemy::AEnemy() {
 	PrimaryActorTick.bCanEverTick = true;
 	
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
+
+	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("EnemyHealthBarWidget"));
+	HealthBarWidget->SetupAttachment(GetRootComponent());
 
 	USkeletalMeshComponent* Skm = GetMesh();
 	Skm->SetCollisionObjectType(ECC_WorldDynamic);
