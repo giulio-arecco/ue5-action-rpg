@@ -152,19 +152,11 @@ void APlayerCharacter::PlayAttackMontage() const {
 	if (AnimInstance != nullptr && AttackMontage != nullptr) {
 		AnimInstance->Montage_Play(AttackMontage);
 
-		FName SectionName = FName();
-		switch(FMath::RandRange(0, 1)) {
-		case 0:
-			SectionName = FName("Attack1");
-			break;
-		case 1:
-			SectionName = FName("Attack2");
-			break;
-		default:
-			UE_LOG(LogTemp, Error, TEXT("APlayerCharacter::AttackStarted - Invalid Montage Section"));
+		if (const int32 NumSections = AttackMontage->GetNumSections(); NumSections > 0) {
+			const int32 RandomIndex = FMath::RandRange(0, NumSections - 1);
+			const FName SectionName = AttackMontage->GetSectionName(RandomIndex);
+			AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 		}
-
-		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 	}
 }
 
