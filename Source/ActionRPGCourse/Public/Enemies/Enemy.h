@@ -1,13 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
 
-class UWidgetComponent;
+class UHealthBarComponent;
 class UAttributeComponent;
 
 UCLASS()
@@ -37,7 +35,7 @@ private:
 	TObjectPtr<UAttributeComponent> Attributes;
 		
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UWidgetComponent> HealthBarWidget;
+	TObjectPtr<UHealthBarComponent> HealthBarComponent;
 	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;

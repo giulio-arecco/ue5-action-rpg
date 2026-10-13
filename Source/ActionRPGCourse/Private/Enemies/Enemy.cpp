@@ -2,7 +2,7 @@
 
 #include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/WidgetComponent.h"
+#include "HUD/HealthBarComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AEnemy::AEnemy() {
@@ -10,8 +10,8 @@ AEnemy::AEnemy() {
 	
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
 
-	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("EnemyHealthBarWidget"));
-	HealthBarWidget->SetupAttachment(GetRootComponent());
+	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("EnemyHealthBarWidget"));
+	HealthBarComponent->SetupAttachment(GetRootComponent());
 
 	USkeletalMeshComponent* Skm = GetMesh();
 	Skm->SetCollisionObjectType(ECC_WorldDynamic);
@@ -26,6 +26,9 @@ AEnemy::AEnemy() {
 
 void AEnemy::BeginPlay() {
 	Super::BeginPlay();
+	if (HealthBarComponent != nullptr) {
+		HealthBarComponent->SetHealthPercent(1.0f);
+	}
 }
 
 void AEnemy::Tick(float DeltaTime) {
