@@ -7,7 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 
 AWeapon::AWeapon():
-	BoxTraceHalfSize(5.0f, 5.0f, 5.0f)
+	BoxTraceHalfSize(5.0f, 5.0f, 5.0f),
+	Damage(20.0f)
 {
 	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
 	WeaponBox->SetupAttachment(GetRootComponent());
@@ -31,11 +32,14 @@ void AWeapon::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket) {
+void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket, AActor* NewOwner, APawn* NewInstigator) {
 	if (InParent != nullptr) {
 		AttachMeshToSocket(InParent, InSocket);
 		GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		ItemState = EItemState::EIS_Equipped;
+
+		SetOwner(NewOwner);
+		SetInstigator(NewInstigator);
 		
 		if (EquipSound != nullptr) {
 			UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
@@ -84,10 +88,21 @@ void AWeapon::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 	);
 	
 	if (!HitSomething) return;
-	
-	AActor* HitActor = BoxHit.GetActor();
-	if (HitActor != nullptr && HitActor->Implements<UHitInterface>()) {
-		IHitInterface::Execute_GetHit(HitActor, BoxHit.ImpactPoint, BoxHit.ImpactNormal);
+
+	if (AActor* HitActor = BoxHit.GetActor(); HitActor != nullptr) {
+		if (HitActor->Implements<UHitInterface>()) {
+			IHitInterface::Execute_GetHit(HitActor, BoxHit.ImpactPoint, BoxHit.ImpactNormal);
+		}
+		
+		// Calls HitActor.TakeDamage
+		UGameplayStatics::ApplyDamage(
+			HitActor, 
+			Damage, 
+			GetInstigator()->GetController(), 
+			this,
+			UDamageType::StaticClass()
+		);
+		
 		ActorsToIgnore.AddUnique(HitActor);
 	}
 	

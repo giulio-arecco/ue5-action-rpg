@@ -104,7 +104,7 @@ void APlayerCharacter::LookTriggered(const FInputActionValue& Value) {
 void APlayerCharacter::InteractStarted() {
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	if (OverlappingWeapon != nullptr) {
-		OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName);
+		OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName, this, this);
 		CharacterState = ECharacterState::ECS_Armed;
 		EquippedWeapon = OverlappingWeapon;
 		OverlappingItem = nullptr;

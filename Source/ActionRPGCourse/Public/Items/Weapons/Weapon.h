@@ -16,7 +16,7 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	
-	void Equip(USceneComponent* InParent, const FName& InSocket);
+	void Equip(USceneComponent* InParent, const FName& InSocket, AActor* NewOwner, APawn* NewInstigator);
 	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocket) const;
 	
 	FORCEINLINE void SetWeaponBoxCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
@@ -51,4 +51,7 @@ private:
 	
 	UPROPERTY(VisibleInstanceOnly, Category = "Weapon Box Trace")
 	TArray<AActor*> ActorsToIgnore;
+	
+	UPROPERTY(EditAnywhere)
+	float Damage;
 };

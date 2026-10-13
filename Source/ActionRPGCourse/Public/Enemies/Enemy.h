@@ -15,8 +15,9 @@ class ACTIONRPGCOURSE_API AEnemy : public ACharacter, public IHitInterface {
 public:
 	AEnemy();
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 protected:
 	virtual void BeginPlay() override;

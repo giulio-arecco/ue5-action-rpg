@@ -51,6 +51,17 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& Im
 	}
 }
 
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	if (Attributes != nullptr && HealthBarComponent != nullptr) {
+		Attributes->ReceiveDamage(DamageAmount);
+		HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
+	}
+	
+	return DamageAmount;
+}
+
 void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
 	const double Theta = ComputeAngleToImpact(ImpactPoint);
 	
