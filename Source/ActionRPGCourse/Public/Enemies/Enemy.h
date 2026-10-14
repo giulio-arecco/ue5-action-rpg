@@ -26,6 +26,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Animation|Montages")
 	TObjectPtr<UAnimMontage> HitReactMontage;
 	
+	UPROPERTY(EditAnywhere, Category = "Animation|Montages")
+	TObjectPtr<UAnimMontage> DeathMontage;
+	
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	TObjectPtr<USoundBase> HitSound;
 	
@@ -39,5 +42,6 @@ private:
 	TObjectPtr<UHealthBarComponent> HealthBarComponent;
 	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
+	void PlayDeathMontage();
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
 };

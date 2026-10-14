@@ -13,6 +13,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void ReceiveDamage(float DamageAmount);
 	
+	FORCEINLINE bool IsAlive() const { return Health > 0.0f; }
 	FORCEINLINE float GetHealthPercent() const { return Health / MaxHealth; }
 
 protected:

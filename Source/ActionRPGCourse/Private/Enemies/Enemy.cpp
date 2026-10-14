@@ -26,8 +26,8 @@ AEnemy::AEnemy() {
 
 void AEnemy::BeginPlay() {
 	Super::BeginPlay();
-	if (HealthBarComponent != nullptr) {
-		HealthBarComponent->SetHealthPercent(1.0f);
+	if (Attributes != nullptr && HealthBarComponent != nullptr) {
+		HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
 	}
 }
 
@@ -40,7 +40,14 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
-	PlayHitReactMontage(ImpactPoint);
+	if (Attributes != nullptr) {
+		if (Attributes->IsAlive()) {
+			PlayHitReactMontage(ImpactPoint);
+		}
+		else {
+			PlayDeathMontage();
+		}
+	}
 	
 	if (HitSound != nullptr) {
 		UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
@@ -84,6 +91,36 @@ void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
 		}
 		
 		AnimInstance->Montage_JumpToSection(Section);
+	}
+}
+
+void AEnemy::PlayDeathMontage() {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr && DeathMontage != nullptr) {
+		AnimInstance->Montage_Play(DeathMontage);
+
+		if (const int32 NumSections = DeathMontage->GetNumSections(); NumSections > 0) {
+			const int32 RandomIndex = FMath::RandRange(0, NumSections - 1);
+			const FName SectionName = DeathMontage->GetSectionName(RandomIndex);
+			AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
+		}
+		
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (HealthBarComponent != nullptr) HealthBarComponent->SetVisibility(false);
+		
+		// Deferred cleanup (once the death animation completes)
+		FOnMontageEnded MontageEndedDelegate;
+		MontageEndedDelegate.BindWeakLambda(this, [this](UAnimMontage* Montage, bool bInterrupted) {
+			if (!bInterrupted) {
+				USkeletalMeshComponent* Mesh = GetMesh();
+				Mesh->bPauseAnims = true;
+				Mesh->SetComponentTickEnabled(false);
+				Mesh->SetGenerateOverlapEvents(false);
+				Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				SetActorTickEnabled(false);
+			}
+		});
+		AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, DeathMontage);
 	}
 }
 
