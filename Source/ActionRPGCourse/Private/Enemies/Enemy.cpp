@@ -5,7 +5,9 @@
 #include "HUD/HealthBarComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-AEnemy::AEnemy() {
+AEnemy::AEnemy():
+	LifeSpanAfterDeath(10.0f)
+{
 	PrimaryActorTick.bCanEverTick = true;
 	
 	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
@@ -71,6 +73,38 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	return DamageAmount;
 }
 
+void AEnemy::PlayDeathMontage() const {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr && DeathMontage != nullptr) {
+		AnimInstance->Montage_Play(DeathMontage);
+
+		if (const int32 NumSections = DeathMontage->GetNumSections(); NumSections > 0) {
+			const int32 RandomIndex = FMath::RandRange(0, NumSections - 1);
+			const FName SectionName = DeathMontage->GetSectionName(RandomIndex);
+			AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
+		}
+		
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (HealthBarComponent != nullptr) HealthBarComponent->SetVisibility(false);
+	}
+}
+
+void AEnemy::FreezeDeathAnimationAndSetDestroyTimer() {
+	USkeletalMeshComponent* Skm = GetMesh();
+	if (Skm != nullptr) {
+		Skm->bPauseAnims = true;
+		Skm->SetComponentTickEnabled(false);
+		Skm->SetGenerateOverlapEvents(false);
+		Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorTickEnabled(false);
+	}
+	
+	// We use this approach instead of SetLifeSpan() because this way the timer does not get updated in the Actor's tick, 
+	// meaning it can be disabled. We use K2_DestroyActor instead of Destroy to match the delegate signature.
+	FTimerHandle DeathTimerHandle;
+	GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &AActor::K2_DestroyActor, LifeSpanAfterDeath, false);
+}
+
 void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
 	const double Theta = ComputeAngleToImpact(ImpactPoint);
 	
@@ -93,36 +127,6 @@ void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
 		}
 		
 		AnimInstance->Montage_JumpToSection(Section);
-	}
-}
-
-void AEnemy::PlayDeathMontage() {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && DeathMontage != nullptr) {
-		AnimInstance->Montage_Play(DeathMontage);
-
-		if (const int32 NumSections = DeathMontage->GetNumSections(); NumSections > 0) {
-			const int32 RandomIndex = FMath::RandRange(0, NumSections - 1);
-			const FName SectionName = DeathMontage->GetSectionName(RandomIndex);
-			AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
-		}
-		
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		if (HealthBarComponent != nullptr) HealthBarComponent->SetVisibility(false);
-		
-		// Deferred cleanup (once the death animation completes)
-		FOnMontageEnded MontageEndedDelegate;
-		MontageEndedDelegate.BindWeakLambda(this, [this](UAnimMontage* Montage, bool bInterrupted) {
-			if (!bInterrupted) {
-				USkeletalMeshComponent* Mesh = GetMesh();
-				Mesh->bPauseAnims = true;
-				Mesh->SetComponentTickEnabled(false);
-				Mesh->SetGenerateOverlapEvents(false);
-				Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				SetActorTickEnabled(false);
-			}
-		});
-		AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, DeathMontage);
 	}
 }
 

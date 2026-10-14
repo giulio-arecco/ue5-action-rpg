@@ -41,7 +41,13 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarComponent;
 	
+	UPROPERTY(EditAnywhere)
+	float LifeSpanAfterDeath;
+	
+	UFUNCTION(BlueprintCallable)
+	void FreezeDeathAnimationAndSetDestroyTimer();
+	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
-	void PlayDeathMontage();
+	void PlayDeathMontage() const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
 };
