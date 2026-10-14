@@ -12,16 +12,18 @@ AEnemy::AEnemy() {
 
 	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("EnemyHealthBarWidget"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
-
-	USkeletalMeshComponent* Skm = GetMesh();
-	Skm->SetCollisionObjectType(ECC_WorldDynamic);
-	Skm->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-	Skm->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	Skm->SetGenerateOverlapEvents(true);	
 	
 	UCapsuleComponent* Capsule = GetCapsuleComponent();
 	Capsule->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	Capsule->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	
+	USkeletalMeshComponent* Skm = GetMesh();
+	Skm->SetCollisionObjectType(ECC_WorldDynamic);
+	Skm->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Skm->SetCollisionResponseToAllChannels(ECR_Ignore);
+	Skm->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+	Skm->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	Skm->SetGenerateOverlapEvents(true);	
 }
 
 void AEnemy::BeginPlay() {
