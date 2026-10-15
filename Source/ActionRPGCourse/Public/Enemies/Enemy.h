@@ -41,6 +41,12 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarComponent;
 	
+	UPROPERTY(VisibleInstanceOnly)
+	TWeakObjectPtr<AActor> CombatTarget;
+	
+	UPROPERTY(EditAnywhere)
+	float CombatRadius;
+	
 	UPROPERTY(EditAnywhere)
 	float LifeSpanAfterDeath;
 	
@@ -48,6 +54,9 @@ private:
 	void FreezeDeathAnimationAndSetDestroyTimer();
 	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
+	void ShowHealthBar() const;
+	void HideHealthBar() const;
 	void PlayDeathMontage() const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
+	bool IsWithinCombatRadius(const AActor* Target) const;
 };

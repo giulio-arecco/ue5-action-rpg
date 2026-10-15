@@ -6,7 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 
 AEnemy::AEnemy():
-	LifeSpanAfterDeath(10.0f)
+	LifeSpanAfterDeath(10.0f),
+	CombatRadius(1000.0f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -30,13 +31,24 @@ AEnemy::AEnemy():
 
 void AEnemy::BeginPlay() {
 	Super::BeginPlay();
+	
 	if (Attributes != nullptr && HealthBarComponent != nullptr) {
 		HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
 	}
+	
+	HideHealthBar();
 }
 
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+	
+	// Only check the distance to the CombatTarget if it's not null
+	if (const AActor* Target = CombatTarget.Get(); Target != nullptr) {
+		if (!IsWithinCombatRadius(Target)) {
+			CombatTarget = nullptr;
+			HideHealthBar();
+		}
+	}
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -65,9 +77,22 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& Im
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
-	if (Attributes != nullptr && HealthBarComponent != nullptr) {
+	if (DamageCauser != nullptr) {
+		// If a EventInstigator used the DamageCauser as a weapon, set the target to
+		// the EventInstigator pawn, otherwise set it to the DamageCauser (actor)
+		CombatTarget = (EventInstigator && EventInstigator->GetPawn()) ? EventInstigator->GetPawn() : DamageCauser;
+	}
+	
+	if (Attributes != nullptr) {
 		Attributes->ReceiveDamage(DamageAmount);
-		HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
+		
+		if (HealthBarComponent != nullptr) {
+			if (Attributes->IsAlive()) {
+				ShowHealthBar();
+				HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
+			}
+			else HideHealthBar();
+		}
 	}
 	
 	return DamageAmount;
@@ -85,7 +110,7 @@ void AEnemy::PlayDeathMontage() const {
 		}
 		
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		if (HealthBarComponent != nullptr) HealthBarComponent->SetVisibility(false);
+		HideHealthBar();
 	}
 }
 
@@ -153,5 +178,25 @@ double AEnemy::ComputeAngleToImpact(const FVector& ImpactPoint) const {
 	// 3. Polar numerical stability: Acos derivative diverges to infinity at 0° (x = 1) and 180° (x = -1), exaggerating small errors,
 	//    whereas Atan2 provides uniform numerical accuracy around the entire circle
 	return FMath::RadiansToDegrees(FMath::Atan2(SinTheta, CosTheta));
+}
+
+void AEnemy::ShowHealthBar() const {
+	if (HealthBarComponent != nullptr && !HealthBarComponent->IsVisible()) {
+		HealthBarComponent->SetVisibility(true);
+	}
+}
+
+void AEnemy::HideHealthBar() const {
+	if (HealthBarComponent != nullptr && HealthBarComponent->IsVisible()) {
+		HealthBarComponent->SetVisibility(false);
+	}
+}
+
+/* Asserts that Target is not a nullptr */
+bool AEnemy::IsWithinCombatRadius(const AActor* Target) const {
+	check(Target)
+	
+	const double DistSq = FVector::DistSquared(GetActorLocation(), Target->GetActorLocation());
+	return DistSq < FMath::Square(CombatRadius);
 }
 
