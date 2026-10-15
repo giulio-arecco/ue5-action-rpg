@@ -32,10 +32,10 @@ AEnemy::AEnemy():
 void AEnemy::BeginPlay() {
 	Super::BeginPlay();
 	
-	if (Attributes != nullptr && HealthBarComponent != nullptr) {
-		HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
-	}
+	checkf(Attributes != nullptr, TEXT("Attributes is null in AEnemy::BeginPlay"));
+	checkf(HealthBarComponent != nullptr, TEXT("HealthBarComponent is null in AEnemy::BeginPlay"));
 	
+	HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
 	HideHealthBar();
 }
 
@@ -192,9 +192,8 @@ void AEnemy::HideHealthBar() const {
 	}
 }
 
-/* Asserts that Target is not a nullptr */
 bool AEnemy::IsWithinCombatRadius(const AActor* Target) const {
-	check(Target)
+	check(Target);
 	
 	const double DistSq = FVector::DistSquared(GetActorLocation(), Target->GetActorLocation());
 	return DistSq < FMath::Square(CombatRadius);

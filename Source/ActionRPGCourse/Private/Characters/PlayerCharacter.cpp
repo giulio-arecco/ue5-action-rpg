@@ -59,15 +59,14 @@ void APlayerCharacter::Tick(float DeltaTime) {
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveTriggered);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookTriggered);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::InteractStarted);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::AttackStarted);
-		// We use the ACharacter::Jump function to handle jumping, since currently there's no need for a APlayerCharacter::JumpTriggered function 
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	}
+	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveTriggered);
+	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookTriggered);
+	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::InteractStarted);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::AttackStarted);
+	// We use the ACharacter::Jump function to handle jumping, since currently there's no need for a APlayerCharacter::JumpTriggered function 
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 }
 
 void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
@@ -169,10 +168,16 @@ void APlayerCharacter::PlayEquipMontage(FName SectionName) const {
 }
 
 void APlayerCharacter::AttachWeaponToHand() const {
+	if (!ensureAlwaysMsgf(EquippedWeapon != nullptr, TEXT("AttachWeaponToHand called via AnimNotify, but EquippedWeapon is null."))) {
+		return;
+	}
 	EquippedWeapon->AttachMeshToSocket(GetMesh(), WeaponHandSocketName);
 }
 
 void APlayerCharacter::AttachWeaponToSpine() const {
+	if (!ensureAlwaysMsgf(EquippedWeapon != nullptr, TEXT("AttachWeaponToSpine called via AnimNotify, but EquippedWeapon is null."))) {
+		return;
+	}
 	EquippedWeapon->AttachMeshToSocket(GetMesh(), WeaponSpineSocketName);
 }
 

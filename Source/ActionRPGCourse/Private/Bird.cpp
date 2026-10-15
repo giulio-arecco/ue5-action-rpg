@@ -54,11 +54,10 @@ void ABird::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	// Cast the UInputComponent to the derived UEnhancedInputComponent class
-	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		// Set up callbacks for the input actions
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABird::MoveTriggered);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABird::LookTriggered);
-	}
+	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+	// Set up callbacks for the input actions
+	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABird::MoveTriggered);
+	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABird::LookTriggered);
 }
 
 void ABird::MoveTriggered(const FInputActionValue& Value) {

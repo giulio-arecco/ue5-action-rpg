@@ -33,20 +33,22 @@ void AWeapon::Tick(float DeltaTime) {
 }
 
 void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket, AActor* NewOwner, APawn* NewInstigator) {
-	if (InParent != nullptr) {
-		AttachMeshToSocket(InParent, InSocket);
-		GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		ItemState = EItemState::EIS_Equipped;
-
-		SetOwner(NewOwner);
-		SetInstigator(NewInstigator);
-		
-		if (EquipSound != nullptr) {
-			UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
-		}
-		
-		DeactivatePickupVFX();
+	if (!ensureAlwaysMsgf(InParent != nullptr, TEXT("Weapon Equip called with null InParent."))) {
+		return;
 	}
+	
+	AttachMeshToSocket(InParent, InSocket);
+	GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ItemState = EItemState::EIS_Equipped;
+
+	SetOwner(NewOwner);
+	SetInstigator(NewInstigator);
+
+	if (EquipSound != nullptr) {
+		UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
+	}
+
+	DeactivatePickupVFX();
 }
 
 void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocket) const {

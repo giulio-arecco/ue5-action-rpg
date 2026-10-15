@@ -23,8 +23,12 @@ void UHealthBarComponent::CacheHealthBarWidget() {
 
 void UHealthBarComponent::SetHealthPercent(float Percent) {
 	CacheHealthBarWidget();
+	
+	if (!ensureMsgf(HealthBarWidget != nullptr, TEXT("HealthBarWidget is null on [%s]. Did you assign the Widget Class in Blueprint?"), *GetOwner()->GetName())) {
+		return;
+	}
 
-	if (UProgressBar* HealthBar = HealthBarWidget->HealthBar; HealthBarWidget != nullptr && HealthBar != nullptr) {
+	if (UProgressBar* HealthBar = HealthBarWidget->HealthBar; HealthBar != nullptr) {
 		HealthBar->SetPercent(Percent);
 	}
 }

@@ -54,9 +54,15 @@ private:
 	void FreezeDeathAnimationAndSetDestroyTimer();
 	
 	void PlayHitReactMontage(const FVector& ImpactPoint) const;
+	
 	void ShowHealthBar() const;
+	
 	void HideHealthBar() const;
+	
 	void PlayDeathMontage() const;
+	
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
+	
+	/* Target must not be null */
 	bool IsWithinCombatRadius(const AActor* Target) const;
 };
