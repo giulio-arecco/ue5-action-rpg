@@ -50,6 +50,7 @@ void ABreakableActor::OnBreak(const FChaosBreakEvent& BreakEvent) {
 	// Disable break notifies to avoid responding to subsequent breaks into sub pieces
 	GeometryCollection->SetNotifyBreaks(false);
 	GeometryCollection->OnChaosBreakEvent.RemoveDynamic(this, &ABreakableActor::OnBreak);
+	GeometryCollection->SetCanEverAffectNavigation(false);
 	
 	SetLifeSpan(LifeSpanAfterBreak);
 	
