@@ -1,13 +1,16 @@
-﻿#include "Enemies/Enemy.h"
+﻿#include "Characters/Enemies/Enemy.h"
 
+#include "AIController.h"
 #include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBarComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Navigation/PathFollowingComponent.h"
 
 AEnemy::AEnemy():
-	LifeSpanAfterDeath(10.0f),
-	CombatRadius(1000.0f)
+	CombatRadius(1000.0f),
+	LifeSpanAfterDeath(10.0f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -27,6 +30,11 @@ AEnemy::AEnemy():
 	Skm->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	Skm->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	Skm->SetGenerateOverlapEvents(true);	
+	
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
 }
 
 void AEnemy::BeginPlay() {
@@ -37,6 +45,20 @@ void AEnemy::BeginPlay() {
 	
 	HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
 	HideHealthBar();
+	
+	AAIController* AiController = CastChecked<AAIController>(GetController());
+	if (!ensureMsgf(PatrolTarget != nullptr, TEXT("[%s] PatrolTarget is null"), *GetName())) return;
+
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(PatrolTarget);
+	MoveRequest.SetAcceptanceRadius(30.0f);
+	
+	FNavPathSharedPtr NavPath;
+	
+	AiController->MoveTo(MoveRequest, &NavPath);
+	for (const FNavPathPoint& Point : NavPath->GetPathPoints()) {
+		DrawDebugSphere(GetWorld(), Point.Location, 25.0f, 12, FColor::Green, false, 10.0f);
+	}
 }
 
 void AEnemy::Tick(float DeltaTime) {

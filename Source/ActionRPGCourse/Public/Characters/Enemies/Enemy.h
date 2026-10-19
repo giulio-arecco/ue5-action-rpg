@@ -35,8 +35,16 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UParticleSystem> HitParticles;
 	
+	// Current patrol target
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TObjectPtr<AActor> PatrolTarget;
+	
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TArray<TObjectPtr<AActor>> PatrolTargets;
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes;
+	
 		
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarComponent;
