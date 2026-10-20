@@ -26,7 +26,7 @@ protected:
 	TObjectPtr<UGeometryCollectionComponent> GeometryCollection;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Break Properties")
-	float LifeSpanAfterBreak;
+	float LifeSpanAfterBreak = 20.0f;
 	
 	virtual void BeginPlay() override;
 	

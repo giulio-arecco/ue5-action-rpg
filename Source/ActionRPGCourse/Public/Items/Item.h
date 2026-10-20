@@ -28,16 +28,16 @@ protected:
 	TObjectPtr<UStaticMeshComponent> ItemMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Values")
-	float MovementAmplitude;
+	float MovementAmplitude = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Values")
-	float MovementPeriod;
+	float MovementPeriod = 2.5f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sine Values")
-	FVector StartLocation;
+	FVector StartLocation = FVector::ZeroVector;
 	
 	UPROPERTY(VisibleInstanceOnly)
-	EItemState ItemState;
+	EItemState ItemState = EItemState::EIS_Hovering;
 	
 	virtual void BeginPlay() override;
 	void DeactivatePickupVFX() const;
@@ -56,7 +56,7 @@ protected:
 	
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	double RunningTime;
+	double RunningTime = 0.0f;
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> Sphere;

@@ -23,8 +23,8 @@ private:
 	TObjectPtr<USoundBase> PickupSound;
 	
 	UPROPERTY(EditAnywhere)
-	float RotationRate;
+	float RotationRate = 45.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Treasure Properties")
-	float GoldAmount;
+	float GoldAmount = 5.0f;
 };

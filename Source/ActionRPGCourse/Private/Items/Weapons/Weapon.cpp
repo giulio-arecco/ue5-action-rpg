@@ -1,15 +1,11 @@
 ﻿#include "Items/Weapons/Weapon.h"
 
-#include "NiagaraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Interfaces/HitInterface.h"
 #include "Kismet/GameplayStatics.h"
 
-AWeapon::AWeapon():
-	BoxTraceHalfSize(5.0f, 5.0f, 5.0f),
-	Damage(20.0f)
-{
+AWeapon::AWeapon() {
 	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
 	WeaponBox->SetupAttachment(GetRootComponent());
 	

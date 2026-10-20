@@ -8,12 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Items/Weapons/Weapon.h"
 
-APlayerCharacter::APlayerCharacter() : 
-	WeaponHandSocketName("hand_r_socket"), 
-	WeaponSpineSocketName("spine_socket"),
-	CharacterState(ECharacterState::ECS_Disarmed), 
-	ActionState(EActionState::EAS_Unoccupied)
-{
+APlayerCharacter::APlayerCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;

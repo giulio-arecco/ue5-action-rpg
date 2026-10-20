@@ -8,12 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/PathFollowingComponent.h"
 
-AEnemy::AEnemy():
-	LifeSpanAfterDeath(10.0f),
-	TargetReachedMinWait(5.0f),
-	TargetReachedMaxWait(10.0f),
-	CombatRadius(1000.0f)
-{
+AEnemy::AEnemy() {
 	PrimaryActorTick.bCanEverTick = true;
 	
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));

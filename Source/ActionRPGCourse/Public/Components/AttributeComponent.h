@@ -21,9 +21,9 @@ protected:
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MaxHealth;
+	float MaxHealth = 100.0f;
 	
 	// Current Health
 	UPROPERTY(EditAnywhere, Category = "Actor Attributes", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float Health;
+	float Health = MaxHealth;
 };

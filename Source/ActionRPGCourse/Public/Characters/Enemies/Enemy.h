@@ -26,7 +26,7 @@ protected:
 	
 private:
 	UPROPERTY(EditAnywhere)
-	float LifeSpanAfterDeath;
+	float LifeSpanAfterDeath = 10.0f;
 	
 	/*****************************
 	 *         Components        *
@@ -75,10 +75,10 @@ private:
 	TWeakObjectPtr<AActor> MoveTarget;
 	
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
-	float TargetReachedMinWait;
+	float TargetReachedMinWait = 5.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
-	float TargetReachedMaxWait;
+	float TargetReachedMaxWait = 10.0f;
 	
 	FTimerHandle TargetReachedTimerHandle;
 	
@@ -90,7 +90,7 @@ private:
 	TWeakObjectPtr<AActor> CombatTarget;
 	
 	UPROPERTY(EditAnywhere)
-	float CombatRadius;
+	float CombatRadius = 1000.0f;
 	
 	/************************************
 	 *    Animation Related Functions   *

@@ -4,13 +4,7 @@
 #include "Characters/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 
-AItem::AItem(): 
-	MovementAmplitude(10.0f), 
-	MovementPeriod(2.5f), 
-	StartLocation(0.0f), 
-	ItemState(EItemState::EIS_Hovering), 
-	RunningTime(0.0f)
-{
+AItem::AItem() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 

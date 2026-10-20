@@ -24,7 +24,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Box Trace")
-	FVector BoxTraceHalfSize;
+	FVector BoxTraceHalfSize = FVector(5.0f, 5.0f, 5.0f);
 	
 	virtual void BeginPlay() override;
 	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) override;
@@ -53,5 +53,5 @@ private:
 	TArray<AActor*> ActorsToIgnore;
 	
 	UPROPERTY(EditAnywhere)
-	float Damage;
+	float Damage = 20.0f;
 };

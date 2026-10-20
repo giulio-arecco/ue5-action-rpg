@@ -4,10 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 
 
-ATreasure::ATreasure():
-	RotationRate(45.0f),
-	GoldAmount(5.0f)
-{
+ATreasure::ATreasure() {
 	PrimaryActorTick.bCanEverTick = true;
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

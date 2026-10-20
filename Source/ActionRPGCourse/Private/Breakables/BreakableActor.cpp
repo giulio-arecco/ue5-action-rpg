@@ -4,9 +4,7 @@
 #include "Items/Treasure.h"
 #include "Kismet/GameplayStatics.h"
 
-ABreakableActor::ABreakableActor():
-	LifeSpanAfterBreak(20.0f)
-{
+ABreakableActor::ABreakableActor() {
 	PrimaryActorTick.bCanEverTick = false;
 
 	GeometryCollection = CreateDefaultSubobject<UGeometryCollectionComponent>(TEXT("BreakableActorGeometryCollection"));

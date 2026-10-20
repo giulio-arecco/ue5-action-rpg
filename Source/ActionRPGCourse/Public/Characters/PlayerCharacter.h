@@ -54,10 +54,10 @@ protected:
 	 ********************************/ 
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	FName WeaponHandSocketName;
+	FName WeaponHandSocketName = "hand_r_socket";
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	FName WeaponSpineSocketName;
+	FName WeaponSpineSocketName = "spine_socket";
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation|Montages")
 	TObjectPtr<UAnimMontage> AttackMontage;
@@ -67,10 +67,10 @@ protected:
 
 private:
 	UPROPERTY(VisibleInstanceOnly)
-	ECharacterState CharacterState;
+	ECharacterState CharacterState = ECharacterState::ECS_Disarmed;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	EActionState ActionState;
+	EActionState ActionState = EActionState::EAS_Unoccupied;
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> ViewCamera;

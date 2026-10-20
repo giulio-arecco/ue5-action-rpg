@@ -1,9 +1,6 @@
 ﻿#include "Components/AttributeComponent.h"
 
-UAttributeComponent::UAttributeComponent():
-	MaxHealth(100.0f),
-	Health(MaxHealth)
-{
+UAttributeComponent::UAttributeComponent() {
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
