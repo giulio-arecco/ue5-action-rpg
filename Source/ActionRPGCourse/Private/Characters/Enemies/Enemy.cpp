@@ -16,7 +16,7 @@ AEnemy::AEnemy():
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
-	Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
+	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
 
 	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("EnemyHealthBarWidget"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
@@ -42,10 +42,10 @@ AEnemy::AEnemy():
 void AEnemy::BeginPlay() {
 	Super::BeginPlay();
 	
-	checkf(Attributes != nullptr, TEXT("Attributes is null in AEnemy::BeginPlay"));
+	checkf(AttributeComponent != nullptr, TEXT("AttributeComponent is null in AEnemy::BeginPlay"));
 	checkf(HealthBarComponent != nullptr, TEXT("HealthBarComponent is null in AEnemy::BeginPlay"));
 	
-	HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
+	HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
 	HideHealthBar();
 	
 	AIController = CastChecked<AAIController>(GetController());
@@ -53,8 +53,8 @@ void AEnemy::BeginPlay() {
 	// Patrolling logic
 	if (PatrolTargets.Num() <= 0) return;
 	
-	PatrolTarget = PickRandomPatrolTarget();
-	if (PatrolTarget == nullptr) return;
+	MoveTarget = PickRandomPatrolTarget();
+	if (MoveTarget == nullptr) return;
 	
 	UPathFollowingComponent* PathFollowingComp = AIController->GetPathFollowingComponent();
 	checkf(PathFollowingComp != nullptr, TEXT("[%s] PathFollowingComponent is null"), *GetName());
@@ -65,14 +65,14 @@ void AEnemy::BeginPlay() {
 
 		const float WaitTime = FMath::RandRange(TargetReachedMinWait, TargetReachedMaxWait);
 		const FTimerDelegate TargetReachedTimerDelegate = FTimerDelegate::CreateWeakLambda(this, [this] {
-			PatrolTarget = PickRandomPatrolTarget();
-			if (PatrolTarget != nullptr) MoveToTarget(PatrolTarget, 30.0f);;
+			MoveTarget = PickRandomPatrolTarget();
+			if (MoveTarget != nullptr) MoveToTarget(MoveTarget, 30.0f);;
 		});
 
 		GetWorldTimerManager().SetTimer(TargetReachedTimerHandle, TargetReachedTimerDelegate, WaitTime, false);
 	});
 	
-	MoveToTarget(PatrolTarget, 30.0f);
+	MoveToTarget(MoveTarget, 30.0f);
 }
 
 void AEnemy::Tick(float DeltaTime) {
@@ -92,8 +92,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
-	if (Attributes != nullptr) {
-		if (Attributes->IsAlive()) {
+	if (AttributeComponent != nullptr) {
+		if (AttributeComponent->IsAlive()) {
 			PlayHitReactMontage(ImpactPoint);
 		}
 		else {
@@ -119,13 +119,13 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 		CombatTarget = (EventInstigator && EventInstigator->GetPawn()) ? EventInstigator->GetPawn() : DamageCauser;
 	}
 	
-	if (Attributes != nullptr) {
-		Attributes->ReceiveDamage(DamageAmount);
+	if (AttributeComponent != nullptr) {
+		AttributeComponent->ReceiveDamage(DamageAmount);
 		
 		if (HealthBarComponent != nullptr) {
-			if (Attributes->IsAlive()) {
+			if (AttributeComponent->IsAlive()) {
 				ShowHealthBar();
-				HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
+				HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
 			}
 			else HideHealthBar();
 		}
@@ -240,19 +240,19 @@ AActor* AEnemy::PickRandomPatrolTarget() const {
 	checkf(NumPatrolTargets > 0, TEXT("[%s] PatrolTargets is empty"), *GetName());
 	
 	// Initial pick
-	if (PatrolTarget == nullptr) {
+	if (MoveTarget == nullptr) {
 		return PatrolTargets[FMath::RandRange(0, NumPatrolTargets - 1)];
 	}
 	
 	// If only 1 target exists:
 	// return it on the first run, but return nullptr once already there.
 	if (NumPatrolTargets == 1) {
-		return (PatrolTarget != PatrolTargets[0]) ? PatrolTargets[0] : nullptr;
+		return (MoveTarget != PatrolTargets[0]) ? PatrolTargets[0] : nullptr;
 	}
 	
-	const int32 CurrentIndex = PatrolTargets.IndexOfByKey(PatrolTarget);
+	const int32 CurrentIndex = PatrolTargets.IndexOfByKey(MoveTarget);
 	
-	// If PatrolTarget is not in the array, pick a random target
+	// If MoveTarget is not in the array, pick a random target
 	if (CurrentIndex == INDEX_NONE) {
 		return PatrolTargets[FMath::RandRange(0, NumPatrolTargets - 1)];
 	}
