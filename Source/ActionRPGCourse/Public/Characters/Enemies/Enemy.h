@@ -72,7 +72,7 @@ private:
 	TArray<TObjectPtr<AActor>> PatrolTargets;
 	
 	UPROPERTY(VisibleInstanceOnly, Category = "AI Navigation")
-	TObjectPtr<AActor> MoveTarget;
+	TWeakObjectPtr<AActor> MoveTarget;
 	
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float TargetReachedMinWait;
@@ -110,9 +110,6 @@ private:
 	
 	AActor* PickRandomPatrolTarget() const;
 	void MoveToTarget(const AActor* Target, float AcceptanceRadius) const;
-	
-	UFUNCTION()
-	void OnSeePawn();
 	
 	/*********************************
 	 *    Combat Related Functions   *

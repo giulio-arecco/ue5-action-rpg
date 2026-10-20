@@ -9,10 +9,10 @@
 #include "Navigation/PathFollowingComponent.h"
 
 AEnemy::AEnemy():
+	LifeSpanAfterDeath(10.0f),
 	TargetReachedMinWait(5.0f),
 	TargetReachedMaxWait(10.0f),
-	CombatRadius(1000.0f),
-	LifeSpanAfterDeath(10.0f)
+	CombatRadius(1000.0f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -66,13 +66,13 @@ void AEnemy::BeginPlay() {
 		const float WaitTime = FMath::RandRange(TargetReachedMinWait, TargetReachedMaxWait);
 		const FTimerDelegate TargetReachedTimerDelegate = FTimerDelegate::CreateWeakLambda(this, [this] {
 			MoveTarget = PickRandomPatrolTarget();
-			if (MoveTarget != nullptr) MoveToTarget(MoveTarget, 30.0f);;
+			if (MoveTarget != nullptr) MoveToTarget(MoveTarget.Get(), 30.0f);;
 		});
 
 		GetWorldTimerManager().SetTimer(TargetReachedTimerHandle, TargetReachedTimerDelegate, WaitTime, false);
 	});
 	
-	MoveToTarget(MoveTarget, 30.0f);
+	MoveToTarget(MoveTarget.Get(), 30.0f);
 }
 
 void AEnemy::Tick(float DeltaTime) {
@@ -239,18 +239,20 @@ AActor* AEnemy::PickRandomPatrolTarget() const {
 	const int32 NumPatrolTargets = PatrolTargets.Num();
 	checkf(NumPatrolTargets > 0, TEXT("[%s] PatrolTargets is empty"), *GetName());
 	
+	AActor* CurrentMoveTarget = MoveTarget.Get();
+	
 	// Initial pick
-	if (MoveTarget == nullptr) {
+	if (CurrentMoveTarget == nullptr) {
 		return PatrolTargets[FMath::RandRange(0, NumPatrolTargets - 1)];
 	}
 	
 	// If only 1 target exists:
 	// return it on the first run, but return nullptr once already there.
 	if (NumPatrolTargets == 1) {
-		return (MoveTarget != PatrolTargets[0]) ? PatrolTargets[0] : nullptr;
+		return (CurrentMoveTarget != PatrolTargets[0]) ? PatrolTargets[0] : nullptr;
 	}
 	
-	const int32 CurrentIndex = PatrolTargets.IndexOfByKey(MoveTarget);
+	const int32 CurrentIndex = PatrolTargets.IndexOfByKey(CurrentMoveTarget);
 	
 	// If MoveTarget is not in the array, pick a random target
 	if (CurrentIndex == INDEX_NONE) {
@@ -259,6 +261,8 @@ AActor* AEnemy::PickRandomPatrolTarget() const {
 	// Otherwise, pick a different target using modulo offset
 	const int32 RandomOffset = FMath::RandRange(1, NumPatrolTargets - 1);
 	const int32 NextIndex = (CurrentIndex + RandomOffset) % NumPatrolTargets;
+	
+	checkf(PatrolTargets[NextIndex] != nullptr, TEXT("[%s] The picked target from PatrolTargets is null"), *GetName());
 	
 	return PatrolTargets[NextIndex];
 }
