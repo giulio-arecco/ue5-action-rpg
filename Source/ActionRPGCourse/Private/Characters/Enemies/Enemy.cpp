@@ -9,6 +9,8 @@
 #include "Navigation/PathFollowingComponent.h"
 
 AEnemy::AEnemy():
+	TargetReachedMinWait(5.0f),
+	TargetReachedMaxWait(10.0f),
 	CombatRadius(1000.0f),
 	LifeSpanAfterDeath(10.0f)
 {
@@ -46,19 +48,31 @@ void AEnemy::BeginPlay() {
 	HealthBarComponent->SetHealthPercent(Attributes->GetHealthPercent());
 	HideHealthBar();
 	
-	AAIController* AiController = CastChecked<AAIController>(GetController());
-	if (!ensureMsgf(PatrolTarget != nullptr, TEXT("[%s] PatrolTarget is null"), *GetName())) return;
+	AIController = CastChecked<AAIController>(GetController());
+	
+	// Patrolling logic
+	if (PatrolTargets.Num() <= 0) return;
+	
+	PatrolTarget = PickRandomPatrolTarget();
+	if (PatrolTarget == nullptr) return;
+	
+	UPathFollowingComponent* PathFollowingComp = AIController->GetPathFollowingComponent();
+	checkf(PathFollowingComp != nullptr, TEXT("[%s] PathFollowingComponent is null"), *GetName());
 
-	FAIMoveRequest MoveRequest;
-	MoveRequest.SetGoalActor(PatrolTarget);
-	MoveRequest.SetAcceptanceRadius(30.0f);
+	PathFollowingComp->OnRequestFinished.AddWeakLambda(this, [this](FAIRequestID RequestID, const FPathFollowingResult& Result) {
+		if (!Result.IsSuccess()) return;
+		// TODO: Return depending on the Enemy state
+
+		const float WaitTime = FMath::RandRange(TargetReachedMinWait, TargetReachedMaxWait);
+		const FTimerDelegate TargetReachedTimerDelegate = FTimerDelegate::CreateWeakLambda(this, [this] {
+			PatrolTarget = PickRandomPatrolTarget();
+			if (PatrolTarget != nullptr) MoveToTarget(PatrolTarget, 30.0f);;
+		});
+
+		GetWorldTimerManager().SetTimer(TargetReachedTimerHandle, TargetReachedTimerDelegate, WaitTime, false);
+	});
 	
-	FNavPathSharedPtr NavPath;
-	
-	AiController->MoveTo(MoveRequest, &NavPath);
-	for (const FNavPathPoint& Point : NavPath->GetPathPoints()) {
-		DrawDebugSphere(GetWorld(), Point.Location, 25.0f, 12, FColor::Green, false, 10.0f);
-	}
+	MoveToTarget(PatrolTarget, 30.0f);
 }
 
 void AEnemy::Tick(float DeltaTime) {
@@ -221,3 +235,46 @@ bool AEnemy::IsWithinCombatRadius(const AActor* Target) const {
 	return DistSq < FMath::Square(CombatRadius);
 }
 
+AActor* AEnemy::PickRandomPatrolTarget() const {
+	const int32 NumPatrolTargets = PatrolTargets.Num();
+	checkf(NumPatrolTargets > 0, TEXT("[%s] PatrolTargets is empty"), *GetName());
+	
+	// Initial pick
+	if (PatrolTarget == nullptr) {
+		return PatrolTargets[FMath::RandRange(0, NumPatrolTargets - 1)];
+	}
+	
+	// If only 1 target exists:
+	// return it on the first run, but return nullptr once already there.
+	if (NumPatrolTargets == 1) {
+		return (PatrolTarget != PatrolTargets[0]) ? PatrolTargets[0] : nullptr;
+	}
+	
+	const int32 CurrentIndex = PatrolTargets.IndexOfByKey(PatrolTarget);
+	
+	// If PatrolTarget is not in the array, pick a random target
+	if (CurrentIndex == INDEX_NONE) {
+		return PatrolTargets[FMath::RandRange(0, NumPatrolTargets - 1)];
+	}
+	// Otherwise, pick a different target using modulo offset
+	const int32 RandomOffset = FMath::RandRange(1, NumPatrolTargets - 1);
+	const int32 NextIndex = (CurrentIndex + RandomOffset) % NumPatrolTargets;
+	
+	return PatrolTargets[NextIndex];
+}
+
+void AEnemy::MoveToTarget(const AActor* Target, float AcceptanceRadius) const {
+	checkf(Target != nullptr, TEXT("[%s] Target is null in MoveToTarget"), *GetName());
+	
+	FAIMoveRequest MoveRequest;
+	MoveRequest.SetGoalActor(Target);
+	MoveRequest.SetAcceptanceRadius(AcceptanceRadius);
+	
+	FNavPathSharedPtr NavPath;
+	AIController->MoveTo(MoveRequest, &NavPath);
+	
+	// Debug
+	for (const FNavPathPoint& Point : NavPath->GetPathPoints()) {
+		DrawDebugSphere(GetWorld(), Point.Location, 25.0f, 12, FColor::Green, false, 10.0f);
+	}
+}

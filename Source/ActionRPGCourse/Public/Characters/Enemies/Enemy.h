@@ -5,6 +5,7 @@
 #include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
 
+class AAIController;
 class UHealthBarComponent;
 class UAttributeComponent;
 
@@ -37,11 +38,20 @@ private:
 	
 	// Current patrol target
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TArray<TObjectPtr<AActor>> PatrolTargets;
+	
+	UPROPERTY(VisibleInstanceOnly, Category = "AI Navigation")
 	TObjectPtr<AActor> PatrolTarget;
 	
-	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
-	TArray<TObjectPtr<AActor>> PatrolTargets;
-
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float TargetReachedMinWait;
+	
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float TargetReachedMaxWait;
+	
+	UPROPERTY()
+	TObjectPtr<AAIController> AIController;
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> Attributes;
 	
@@ -58,6 +68,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	float LifeSpanAfterDeath;
 	
+	FTimerHandle TargetReachedTimerHandle;
+	
 	UFUNCTION(BlueprintCallable)
 	void FreezeDeathAnimationAndSetDestroyTimer();
 	
@@ -73,4 +85,8 @@ private:
 	
 	/* Target must not be null */
 	bool IsWithinCombatRadius(const AActor* Target) const;
+	
+	AActor* PickRandomPatrolTarget() const;
+	
+	void MoveToTarget(const AActor* Target, float AcceptanceRadius) const;
 };
