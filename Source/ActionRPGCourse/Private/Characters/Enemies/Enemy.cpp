@@ -65,40 +65,92 @@ void AEnemy::BeginPlay() {
 	PathFollowingComp->OnRequestFinished.AddWeakLambda(this, [this] (FAIRequestID RequestID, const FPathFollowingResult& Result) {
 		// Only set the timer if the movement was finished and the enemy is patrolling
 		if (!Result.IsSuccess() || EnemyState != EEnemyState::EES_Patrolling) return;
+		
+		UE_LOG(LogTemp, Warning, TEXT("OnRequestFinished"));
 
 		const float WaitTime = FMath::RandRange(TargetReachedMinWait, TargetReachedMaxWait);
 		const FTimerDelegate TargetReachedTimerDelegate = FTimerDelegate::CreateWeakLambda(this, [this] {
 			AActor* NewTargetActor = PickRandomPatrolTarget();
-			if (NewTargetActor != nullptr) MoveToTarget(NewTargetActor, 30.0f);;
+			if (NewTargetActor != nullptr) MoveToTarget(NewTargetActor, TargetReachedAcceptanceRadius);;
 		});
 
-		GetWorldTimerManager().SetTimer(TargetReachedTimerHandle, TargetReachedTimerDelegate, WaitTime, false);
+		GetWorldTimerManager().SetTimer(PatrolTimerHandle, TargetReachedTimerDelegate, WaitTime, false);
 	});
 	
 	AActor* TargetActor = PickRandomPatrolTarget();
-	if (TargetActor != nullptr) MoveToTarget(TargetActor, 30.0f);
+	if (TargetActor != nullptr) MoveToTarget(TargetActor, TargetReachedAcceptanceRadius);
 }
 
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	
-	// Only check the distance to the CombatTarget if it's not null
-	if (const AActor* Target = CombatTarget.Get(); Target != nullptr) {
-		if (!IsWithinCombatRadius(Target)) {
-			CombatTarget = nullptr;
-			EnemyState = EEnemyState::EES_Patrolling;
-			HideHealthBar();
-			
-			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-			
-			if (PatrolTargets.Num() > 0) {
-				AActor* PatrolTarget = PickRandomPatrolTarget();
-				if (PatrolTarget != nullptr) MoveToTarget(PatrolTarget, 30.0f);
-			}
-			else {
-				AIController->StopMovement();
-			}
+	if (AActor* Target = CombatTarget.Get(); Target != nullptr) {
+		switch (EnemyState) {
+		case EEnemyState::EES_Patrolling:
+			if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Attacking);
+			else if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
+			break;
+		case EEnemyState::EES_Chasing:
+			if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Attacking);
+			else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Patrolling);
+			break;
+		case EEnemyState::EES_Attacking:
+			if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Patrolling);
+			else if (!IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Chasing);
+			break;
+		case EEnemyState::EES_Dead:
+			break;
 		}
+	}
+}
+
+void AEnemy::TransitionToState(EEnemyState NewState) {
+	checkf(GetCharacterMovement() != nullptr, TEXT("[%s] CharacterMovement is null"), *GetName());
+	
+	if (EnemyState == NewState) return;
+	
+	switch (NewState) {
+	case EEnemyState::EES_Patrolling:
+		UE_LOG(LogTemp, Warning, TEXT("Patrolling"));
+		
+		EnemyState = EEnemyState::EES_Patrolling;
+		CombatTarget = nullptr;
+		HideHealthBar();
+			
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+			
+		if (PatrolTargets.Num() > 0) {
+			AActor* PatrolTarget = PickRandomPatrolTarget();
+			if (PatrolTarget != nullptr) MoveToTarget(PatrolTarget, TargetReachedAcceptanceRadius);
+		}
+		else {
+			AIController->StopMovement();
+		}
+		
+		break;
+	case EEnemyState::EES_Chasing:
+		UE_LOG(LogTemp, Warning, TEXT("Chasing"));
+		
+		EnemyState = EEnemyState::EES_Chasing;
+			
+		ShowHealthBar();
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+			
+		MoveToTarget(CombatTarget.Get(), TargetReachedAcceptanceRadius);
+		
+		break;
+	case EEnemyState::EES_Attacking:
+		UE_LOG(LogTemp, Warning, TEXT("Attacking"));
+		
+		EnemyState = EEnemyState::EES_Attacking;
+			
+		ShowHealthBar();
+		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+		
+		break;
+	case EEnemyState::EES_Dead:
+		break;
 	}
 }
 
@@ -109,9 +161,9 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
 	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null in GetHit_Implementation."), *GetName());
 	
-	if (EnemyState == EEnemyState::EES_Dead || !AttributeComponent->IsAlive()) return;
-	
-	PlayHitReactMontage(ImpactPoint);
+	if (EnemyState != EEnemyState::EES_Dead && AttributeComponent->IsAlive()) {
+		PlayHitReactMontage(ImpactPoint);
+	}
 	
 	if (HitSound != nullptr) UGameplayStatics::PlaySoundAtLocation(this, HitSound, ImpactPoint);
 	if (HitParticles != nullptr) UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticles, ImpactPoint, ImpactNormal.Rotation());
@@ -159,6 +211,7 @@ void AEnemy::PlayDeathMontage() const {
 }
 
 void AEnemy::Die() {
+	UE_LOG(LogTemp, Warning, TEXT("Dead"));
 	EnemyState = EEnemyState::EES_Dead;
 	
 	DetachFromControllerPendingDestroy();
@@ -182,7 +235,7 @@ void AEnemy::Die() {
 	}
 	
 	HideHealthBar();
-	GetWorldTimerManager().ClearTimer(TargetReachedTimerHandle);
+	GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
 	
 	PlayDeathMontage();
 	
@@ -305,18 +358,15 @@ void AEnemy::MoveToTarget(AActor* Target, float AcceptanceRadius) {
 
 void AEnemy::OnSeePawn(APawn* SeenPawn) {
 	if (!SeenPawn->ActorHasTag(FName("PlayerCharacter"))
+		|| EnemyState == EEnemyState::EES_Attacking
 		|| EnemyState == EEnemyState::EES_Chasing
 		|| EnemyState == EEnemyState::EES_Dead) 
 		return;
 	
-	EnemyState = EEnemyState::EES_Chasing;
+	UE_LOG(LogTemp, Warning, TEXT("Seen Character"));
+	
 	CombatTarget = SeenPawn;
-	ShowHealthBar();
-	
-	GetWorldTimerManager().ClearTimer(TargetReachedTimerHandle);
-	
-	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-	MoveToTarget(SeenPawn, 30.0f);
+	TransitionToState(EEnemyState::EES_Chasing);
 }
 
 void AEnemy::ShowHealthBar() const {
@@ -335,9 +385,9 @@ void AEnemy::HideHealthBar() const {
 	}
 }
 
-bool AEnemy::IsWithinCombatRadius(const AActor* Target) const {
+bool AEnemy::IsInTargetRange(const AActor* Target, float Range) const {
 	check(Target);
 	
 	const double DistSq = FVector::DistSquared(GetActorLocation(), Target->GetActorLocation());
-	return DistSq < FMath::Square(CombatRadius);
+	return DistSq < FMath::Square(Range);
 }

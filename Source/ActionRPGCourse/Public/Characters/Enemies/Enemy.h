@@ -90,7 +90,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float TargetReachedMaxWait = 10.0f;
 	
-	FTimerHandle TargetReachedTimerHandle;
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float TargetReachedAcceptanceRadius = 50.0f;
+	
+	FTimerHandle PatrolTimerHandle;
 	
 	/*********************************
 	 *    Combat Related Variables   *
@@ -101,6 +104,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float CombatRadius = 2000.0f;
+	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float AttackRadius = 200.0f;
 	
 	/************************************
 	 *    Animation Related Functions   *
@@ -121,6 +127,8 @@ private:
 	AActor* PickRandomPatrolTarget() const;
 	void MoveToTarget(AActor* Target, float AcceptanceRadius);
 	
+	void TransitionToState(EEnemyState NewState);
+	
 	UFUNCTION()
 	void OnSeePawn(APawn* SeenPawn);
 	
@@ -131,9 +139,8 @@ private:
 	void Die();
 	
 	void ShowHealthBar() const;
-	
 	void HideHealthBar() const;
 	
 	/* Target must not be null */
-	bool IsWithinCombatRadius(const AActor* Target) const;
+	bool IsInTargetRange(const AActor* Target, float Range) const;
 };
