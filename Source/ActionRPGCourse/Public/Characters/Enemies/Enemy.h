@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/CharacterTypes.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
@@ -25,6 +26,9 @@ protected:
 	virtual void BeginPlay() override;
 	
 private:
+	UPROPERTY(VisibleInstanceOnly)
+	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
+	
 	UPROPERTY(EditAnywhere)
 	float LifeSpanAfterDeath = 10.0f;
 	
@@ -75,6 +79,12 @@ private:
 	TWeakObjectPtr<AActor> MoveTarget;
 	
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float WalkSpeed = 125.0f;
+	
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float RunSpeed = 300.0f;
+
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float TargetReachedMinWait = 5.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
@@ -86,11 +96,11 @@ private:
 	 *    Combat Related Variables   *
 	 *********************************/ 
 	
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY(VisibleInstanceOnly, Category = "Combat")
 	TWeakObjectPtr<AActor> CombatTarget;
 	
-	UPROPERTY(EditAnywhere)
-	float CombatRadius = 1000.0f;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float CombatRadius = 2000.0f;
 	
 	/************************************
 	 *    Animation Related Functions   *
@@ -109,11 +119,16 @@ private:
 	 ****************************/ 
 	
 	AActor* PickRandomPatrolTarget() const;
-	void MoveToTarget(const AActor* Target, float AcceptanceRadius) const;
+	void MoveToTarget(AActor* Target, float AcceptanceRadius);
+	
+	UFUNCTION()
+	void OnSeePawn(APawn* SeenPawn);
 	
 	/*********************************
 	 *    Combat Related Functions   *
 	 *********************************/ 
+	
+	void Die();
 	
 	void ShowHealthBar() const;
 	
