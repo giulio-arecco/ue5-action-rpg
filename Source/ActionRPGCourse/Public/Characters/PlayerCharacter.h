@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "BaseCharacter.h"
 #include "CharacterTypes.h"
-#include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
 
@@ -16,7 +16,7 @@ class UInputMappingContext;
 class UAnimMontage;
 
 UCLASS()
-class ACTIONRPGCOURSE_API APlayerCharacter : public ACharacter {
+class ACTIONRPGCOURSE_API APlayerCharacter : public ABaseCharacter {
 	GENERATED_BODY()
 
 public:
@@ -26,7 +26,10 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
-
+	
+	virtual bool CanAttack() const override;
+	virtual void Attack() override;
+	
 	/*****************************
 	 *  Input-related Variables  *
 	 ****************************/ 
@@ -58,9 +61,6 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
 	FName WeaponSpineSocketName = "spine_socket";
-
-	UPROPERTY(EditDefaultsOnly, Category = "Animation|Montages")
-	TObjectPtr<UAnimMontage> AttackMontage;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation|Montages")
 	TObjectPtr<UAnimMontage> EquipMontage;
@@ -87,9 +87,6 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Equipment")
 	TObjectPtr<AItem> OverlappingItem;
 	
-	UPROPERTY(VisibleInstanceOnly, Category = "Equipment")
-	TObjectPtr<AWeapon> EquippedWeapon;
-	
 	/*************************
 	 *    Input Callbacks    *
 	 ************************/ 
@@ -103,10 +100,8 @@ private:
 	 *  Animation-related Functions  *
 	 ********************************/
 
-	void PlayAttackMontage() const;
 	void PlayEquipMontage(FName SectionName) const;
 	
-	bool CanAttack() const;
 	bool CanArm() const;
 	bool CanDisarm() const;
 	
@@ -115,9 +110,6 @@ private:
 	
 	UFUNCTION(BlueprintCallable)
 	void AttachWeaponToSpine() const;
-	
-	UFUNCTION(BlueprintCallable)
-	void SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 	

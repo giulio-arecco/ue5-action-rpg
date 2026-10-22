@@ -12,7 +12,6 @@
 AEnemy::AEnemy() {
 	PrimaryActorTick.bCanEverTick = true;
 	
-	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
 
 	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("EnemyHealthBarWidget"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
@@ -157,36 +156,7 @@ void AEnemy::TransitionToState(EEnemyState NewState) {
 		
 		break;
 	case EEnemyState::EES_Dead:
-		UE_LOG(LogTemp, Warning, TEXT("Dead"));
-		
-		EnemyState = EEnemyState::EES_Dead;
-		
-		DetachFromControllerPendingDestroy();
-	
-		if (UCharacterMovementComponent* CharMove = GetCharacterMovement(); CharMove != nullptr) {
-			CharMove->DisableMovement();
-			CharMove->StopMovementImmediately();
-		}
-	
-		if (PawnSensingComponent != nullptr) {
-			PawnSensingComponent->SetSensingUpdatesEnabled(false);
-		}
-	
-		if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent(); CapsuleComp != nullptr) {
-			CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-	
-		if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
-			Skm->SetGenerateOverlapEvents(false);
-			Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-	
-		HideHealthBar();
-		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
-	
-		PlayDeathMontage();
-	
-		SetActorTickEnabled(false);
+		Die();
 		break;
 	}
 }
@@ -291,31 +261,6 @@ void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
 	}
 }
 
-double AEnemy::ComputeAngleToImpact(const FVector& ImpactPoint) const {
-	const FVector Location = GetActorLocation();
-	const FVector Up = GetActorUpVector();
-	const FVector ToHit = FVector::VectorPlaneProject(ImpactPoint - Location, Up).GetSafeNormal();
-	
-	if (ToHit.IsNearlyZero()) return 0.0;
-	
-	const FVector Forward = GetActorForwardVector(); // already normalized
-	const FVector Cross = FVector::CrossProduct(Forward, ToHit);
-	// Since Cross is aligned with Up and Up is a unit vector, their dot product is: 
-	// |Cross| * |Up| * cosAlpha = |Cross| * 1 * (±1) = ±|Cross|
-	// and the sign information is needed for Atan2
-	const double SinTheta = FVector::DotProduct(Cross, Up);
-	const double CosTheta = FVector::DotProduct(Forward, ToHit);
-	
-	// We use Atan2 over Acos or Atan because:
-	// 1. Eliminates division-by-zero: standard atan(y/x) breaks when CosTheta == 0;
-	//    Atan2 safely inspects both coordinates natively without explicit division.
-	// 2. Immune to float drift NaNs: Acos produces NaN if DotProduct exceeds 1.0 due to precision drift;
-	//    Atan2 is well-defined across all real coordinate pairs (x, y) != (0, 0).
-	// 3. Polar numerical stability: Acos derivative diverges to infinity at 0° (x = 1) and 180° (x = -1), exaggerating small errors,
-	//    whereas Atan2 provides uniform numerical accuracy around the entire circle
-	return FMath::RadiansToDegrees(FMath::Atan2(SinTheta, CosTheta));
-}
-
 AActor* AEnemy::PickRandomPatrolTarget() const {
 	const int32 NumPatrolTargets = PatrolTargets.Num();
 	checkf(NumPatrolTargets > 0, TEXT("[%s] PatrolTargets is empty"), *GetName());
@@ -387,6 +332,41 @@ void AEnemy::HideHealthBar() const {
 	if (HealthBarComponent->IsVisible()) {
 		HealthBarComponent->SetVisibility(false);
 	}
+}
+
+void AEnemy::Die() {
+	Super::Die();
+	
+	UE_LOG(LogTemp, Warning, TEXT("Dead"));
+		
+	EnemyState = EEnemyState::EES_Dead;
+		
+	DetachFromControllerPendingDestroy();
+	
+	if (UCharacterMovementComponent* CharMove = GetCharacterMovement(); CharMove != nullptr) {
+		CharMove->DisableMovement();
+		CharMove->StopMovementImmediately();
+	}
+	
+	if (PawnSensingComponent != nullptr) {
+		PawnSensingComponent->SetSensingUpdatesEnabled(false);
+	}
+	
+	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent(); CapsuleComp != nullptr) {
+		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
+		Skm->SetGenerateOverlapEvents(false);
+		Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	HideHealthBar();
+	GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+	
+	PlayDeathMontage();
+	
+	SetActorTickEnabled(false);
 }
 
 bool AEnemy::IsInTargetRange(const AActor* Target, float Range) const {

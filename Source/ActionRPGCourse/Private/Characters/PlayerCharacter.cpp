@@ -106,7 +106,7 @@ void APlayerCharacter::InteractStarted() {
 		OverlappingItem = nullptr;
 	}
 	else {
-		if (CanArm()) {
+		if (CanArm()) { 
 			ActionState = EActionState::EAS_ArmingOrDisarming;
 			PlayEquipMontage(FName("Equip"));
 			CharacterState = ECharacterState::ECS_Armed;
@@ -120,7 +120,13 @@ void APlayerCharacter::InteractStarted() {
 }
 
 void APlayerCharacter::AttackStarted() {
+	Attack();
+}
+
+void APlayerCharacter::Attack() {
 	if (CanAttack()) {
+		Super::Attack();
+		
 		ActionState = EActionState::EAS_Attacking;
 		PlayAttackMontage();
 	}
@@ -141,19 +147,6 @@ bool APlayerCharacter::CanDisarm() const {
 	return ActionState == EActionState::EAS_Unoccupied &&
 		CharacterState == ECharacterState::ECS_Armed &&
 		EquippedWeapon != nullptr;
-}
-
-void APlayerCharacter::PlayAttackMontage() const {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && AttackMontage != nullptr) {
-		AnimInstance->Montage_Play(AttackMontage);
-
-		if (const int32 NumSections = AttackMontage->GetNumSections(); NumSections > 0) {
-			const int32 RandomIndex = FMath::RandRange(0, NumSections - 1);
-			const FName SectionName = AttackMontage->GetSectionName(RandomIndex);
-			AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
-		}
-	}
 }
 
 void APlayerCharacter::PlayEquipMontage(FName SectionName) const {
@@ -177,11 +170,3 @@ void APlayerCharacter::AttachWeaponToSpine() const {
 	}
 	EquippedWeapon->AttachWeaponToSocket(GetMesh(), WeaponSpineSocketName);
 }
-
-void APlayerCharacter::SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const {
-	if (EquippedWeapon != nullptr) {
-		EquippedWeapon->SetWeaponBoxCollisionEnabled(CollisionEnabled);
-		EquippedWeapon->EmptyActorsToIgnore();
-	}
-}
-

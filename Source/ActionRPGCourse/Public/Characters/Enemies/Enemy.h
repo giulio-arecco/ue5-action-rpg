@@ -1,9 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/BaseCharacter.h"
 #include "Characters/CharacterTypes.h"
-#include "GameFramework/Character.h"
-#include "Interfaces/HitInterface.h"
 #include "Enemy.generated.h"
 
 class UPawnSensingComponent;
@@ -12,7 +11,7 @@ class UHealthBarComponent;
 class UAttributeComponent;
 
 UCLASS()
-class ACTIONRPGCOURSE_API AEnemy : public ACharacter, public IHitInterface {
+class ACTIONRPGCOURSE_API AEnemy : public ABaseCharacter {
 	GENERATED_BODY()
 
 public:
@@ -24,6 +23,8 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void PlayHitReactMontage(const FVector& ImpactPoint) const override;
+	virtual void PlayDeathMontage() const override;
 	
 private:
 	UPROPERTY(VisibleInstanceOnly)
@@ -40,33 +41,10 @@ private:
 	TObjectPtr<AAIController> AIController;
 	
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAttributeComponent> AttributeComponent;
-	
-	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthBarComponent> HealthBarComponent;
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UPawnSensingComponent> PawnSensingComponent;
-	
-	/*****************************
-	 *     Animation Montages    *
-	 ****************************/ 
-	
-	UPROPERTY(EditAnywhere, Category = "Animation|Montages")
-	TObjectPtr<UAnimMontage> HitReactMontage;
-	
-	UPROPERTY(EditAnywhere, Category = "Animation|Montages")
-	TObjectPtr<UAnimMontage> DeathMontage;
-	
-	/*****************************
-	 *   Hit Related Variables   *
-	 ****************************/ 
-	
-	UPROPERTY(EditAnywhere, Category = "Sound")
-	TObjectPtr<USoundBase> HitSound;
-	
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UParticleSystem> HitParticles;
 	
 	/*****************************
 	 *    AI Related Variables   *
@@ -112,11 +90,6 @@ private:
 	 *    Animation Related Functions   *
 	 ************************************/ 
 	
-	void PlayHitReactMontage(const FVector& ImpactPoint) const;
-	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
-	
-	void PlayDeathMontage() const;
-	
 	UFUNCTION(BlueprintCallable)
 	void FreezeDeathAnimationAndSetDestroyTimer();
 	
@@ -138,6 +111,8 @@ private:
 	
 	void ShowHealthBar() const;
 	void HideHealthBar() const;
+	
+	virtual void Die() override;
 	
 	/* Target must not be null */
 	bool IsInTargetRange(const AActor* Target, float Range) const;
