@@ -25,6 +25,9 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USceneComponent> ItemRoot;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> ItemMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Values")

@@ -8,14 +8,12 @@ AItem::AItem() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
-	SetRootComponent(ItemMesh);
-	
+	ItemRoot = CreateDefaultSubobject<USceneComponent>(TEXT("ItemRoot"));
+	SetRootComponent(ItemRoot);
+
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	// ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	// ItemMesh->SetCollisionObjectType(ECC_WorldDynamic);
-	// ItemMesh->SetCollisionResponseToAllChannels(ECR_Overlap);
-	// ItemMesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	ItemMesh->SetupAttachment(ItemRoot);
 	
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("ItemSphere"));
 	Sphere->SetupAttachment(GetRootComponent());

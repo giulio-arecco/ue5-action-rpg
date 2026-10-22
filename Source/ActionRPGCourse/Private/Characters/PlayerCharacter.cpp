@@ -168,14 +168,14 @@ void APlayerCharacter::AttachWeaponToHand() const {
 	if (!ensureAlwaysMsgf(EquippedWeapon != nullptr, TEXT("AttachWeaponToHand called via AnimNotify, but EquippedWeapon is null."))) {
 		return;
 	}
-	EquippedWeapon->AttachMeshToSocket(GetMesh(), WeaponHandSocketName);
+	EquippedWeapon->AttachWeaponToSocket(GetMesh(), WeaponHandSocketName);
 }
 
 void APlayerCharacter::AttachWeaponToSpine() const {
 	if (!ensureAlwaysMsgf(EquippedWeapon != nullptr, TEXT("AttachWeaponToSpine called via AnimNotify, but EquippedWeapon is null."))) {
 		return;
 	}
-	EquippedWeapon->AttachMeshToSocket(GetMesh(), WeaponSpineSocketName);
+	EquippedWeapon->AttachWeaponToSocket(GetMesh(), WeaponSpineSocketName);
 }
 
 void APlayerCharacter::SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const {

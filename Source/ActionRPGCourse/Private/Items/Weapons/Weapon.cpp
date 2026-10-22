@@ -7,16 +7,16 @@
 
 AWeapon::AWeapon() {
 	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
-	WeaponBox->SetupAttachment(GetRootComponent());
+	WeaponBox->SetupAttachment(ItemMesh);
 	
 	WeaponBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponBox->SetCollisionResponseToAllChannels(ECR_Overlap);
 	WeaponBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
 	BoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponBoxTraceStart"));
-	BoxTraceStart->SetupAttachment(GetRootComponent());
+	BoxTraceStart->SetupAttachment(ItemMesh);
 	BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponBoxTraceEnd"));
-	BoxTraceEnd->SetupAttachment(GetRootComponent());
+	BoxTraceEnd->SetupAttachment(ItemMesh);
 }
 
 void AWeapon::BeginPlay() {
@@ -33,7 +33,7 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket, AActor* Ne
 		return;
 	}
 	
-	AttachMeshToSocket(InParent, InSocket);
+	AttachWeaponToSocket(InParent, InSocket);
 	GetSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ItemState = EItemState::EIS_Equipped;
 
@@ -47,9 +47,10 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket, AActor* Ne
 	DeactivatePickupVFX();
 }
 
-void AWeapon::AttachMeshToSocket(USceneComponent* InParent, const FName& InSocket) const {
+void AWeapon::AttachWeaponToSocket(USceneComponent* InParent, const FName& InSocket) const {
+	ItemMesh->ResetRelativeTransform();
 	const FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-	ItemMesh->AttachToComponent(InParent, TransformRules, InSocket);
+	ItemRoot->AttachToComponent(InParent, TransformRules, InSocket);
 }
 
 void AWeapon::SetWeaponBoxCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const {
