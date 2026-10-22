@@ -16,6 +16,7 @@ public:
 	ABaseCharacter();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void Destroyed() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 protected:

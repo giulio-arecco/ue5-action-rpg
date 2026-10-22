@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBarComponent.h"
+#include "Items/Weapons/Weapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/PawnSensingComponent.h"
@@ -45,6 +46,12 @@ void AEnemy::BeginPlay() {
 	checkf(AttributeComponent != nullptr, TEXT("AttributeComponent is null in AEnemy::BeginPlay"));
 	checkf(HealthBarComponent != nullptr, TEXT("HealthBarComponent is null in AEnemy::BeginPlay"));
 	checkf(PawnSensingComponent != nullptr, TEXT("PawnSensingComponent is null in AEnemy::BeginPlay"));
+	
+	if (WeaponClass != nullptr) {
+		AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
+		Weapon->Equip(GetMesh(), WeaponSocketName, this, this);
+		EquippedWeapon = Weapon;
+	}
 	
 	HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
 	HideHealthBar();
@@ -223,6 +230,7 @@ void AEnemy::PlayDeathMontage() const {
 		HideHealthBar();
 	}
 }
+
 
 void AEnemy::FreezeDeathAnimationAndSetDestroyTimer() {
 	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {

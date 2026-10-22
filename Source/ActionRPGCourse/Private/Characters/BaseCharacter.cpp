@@ -17,6 +17,14 @@ void ABaseCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
+void ABaseCharacter::Destroyed() {
+	Super::Destroyed();
+	
+	if (EquippedWeapon != nullptr) {
+		EquippedWeapon->Destroy();
+	}
+}
+
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }

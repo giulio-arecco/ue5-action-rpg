@@ -77,6 +77,12 @@ private:
 	 *    Combat Related Variables   *
 	 *********************************/ 
 	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FName WeaponSocketName = "RightHandSocket";
+	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TSubclassOf<AWeapon> WeaponClass;
+	
 	UPROPERTY(VisibleInstanceOnly, Category = "Combat")
 	TWeakObjectPtr<AActor> CombatTarget;
 	
