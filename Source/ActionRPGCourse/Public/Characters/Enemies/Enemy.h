@@ -136,8 +136,6 @@ private:
 	 *    Combat Related Functions   *
 	 *********************************/ 
 	
-	void Die();
-	
 	void ShowHealthBar() const;
 	void HideHealthBar() const;
 	

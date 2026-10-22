@@ -84,30 +84,35 @@ void AEnemy::BeginPlay() {
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	
-	if (AActor* Target = CombatTarget.Get(); Target != nullptr) {
-		switch (EnemyState) {
-		case EEnemyState::EES_Patrolling:
-			if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Attacking);
-			else if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
-			break;
-		case EEnemyState::EES_Chasing:
-			if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Attacking);
-			else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Patrolling);
-			break;
-		case EEnemyState::EES_Attacking:
-			if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Patrolling);
-			else if (!IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Chasing);
-			break;
-		case EEnemyState::EES_Dead:
-			break;
-		}
+	AActor* Target = CombatTarget.Get();
+	
+	switch (EnemyState) {
+	// The conditions to transition to the Dead state are checked in TakeDamage
+	case EEnemyState::EES_Patrolling:
+		if (Target == nullptr) break;
+		if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Attacking);
+		else if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
+		break;
+	case EEnemyState::EES_Chasing:
+		if (Target == nullptr) TransitionToState(EEnemyState::EES_Patrolling);
+		else if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Attacking);
+		else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Patrolling);
+		break;
+	case EEnemyState::EES_Attacking:
+		if (Target == nullptr) TransitionToState(EEnemyState::EES_Patrolling);
+		else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Patrolling);
+		else if (!IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Chasing);
+		break;
+	case EEnemyState::EES_Dead:
+		break;
 	}
 }
 
 void AEnemy::TransitionToState(EEnemyState NewState) {
-	checkf(GetCharacterMovement() != nullptr, TEXT("[%s] CharacterMovement is null"), *GetName());
-	
 	if (EnemyState == NewState) return;
+	
+	checkf(GetCharacterMovement() != nullptr, TEXT("[%s] CharacterMovement is null"), *GetName());
+	checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
 	
 	switch (NewState) {
 	case EEnemyState::EES_Patrolling:
@@ -148,8 +153,40 @@ void AEnemy::TransitionToState(EEnemyState NewState) {
 		ShowHealthBar();
 		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
 		
+		AIController->StopMovement();
+		
 		break;
 	case EEnemyState::EES_Dead:
+		UE_LOG(LogTemp, Warning, TEXT("Dead"));
+		
+		EnemyState = EEnemyState::EES_Dead;
+		
+		DetachFromControllerPendingDestroy();
+	
+		if (UCharacterMovementComponent* CharMove = GetCharacterMovement(); CharMove != nullptr) {
+			CharMove->DisableMovement();
+			CharMove->StopMovementImmediately();
+		}
+	
+		if (PawnSensingComponent != nullptr) {
+			PawnSensingComponent->SetSensingUpdatesEnabled(false);
+		}
+	
+		if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent(); CapsuleComp != nullptr) {
+			CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	
+		if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
+			Skm->SetGenerateOverlapEvents(false);
+			Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	
+		HideHealthBar();
+		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+	
+		PlayDeathMontage();
+	
+		SetActorTickEnabled(false);
 		break;
 	}
 }
@@ -170,6 +207,8 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& Im
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
+	if (EnemyState == EEnemyState::EES_Dead) return 0.0f;
+	
 	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
 	checkf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName());
 	
@@ -184,11 +223,16 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	AttributeComponent->ReceiveDamage(DamageAmount);
 	
 	if (AttributeComponent->IsAlive()) {
-		ShowHealthBar();
 		HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
+		ShowHealthBar();
+
+		if (const AActor* Target = CombatTarget.Get(); Target != nullptr) {
+			if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Attacking);
+			else if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
+		}
 	}
 	else {
-		Die();
+		TransitionToState(EEnemyState::EES_Dead);
 	}
 	
 	return DamageAmount;
@@ -208,38 +252,6 @@ void AEnemy::PlayDeathMontage() const {
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		HideHealthBar();
 	}
-}
-
-void AEnemy::Die() {
-	UE_LOG(LogTemp, Warning, TEXT("Dead"));
-	EnemyState = EEnemyState::EES_Dead;
-	
-	DetachFromControllerPendingDestroy();
-	
-	if (UCharacterMovementComponent* CharMove = GetCharacterMovement(); CharMove != nullptr) {
-		CharMove->DisableMovement();
-		CharMove->StopMovementImmediately();
-	}
-	
-	if (PawnSensingComponent != nullptr) {
-		PawnSensingComponent->SetSensingUpdatesEnabled(false);
-	}
-	
-	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent(); CapsuleComp != nullptr) {
-		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
-	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
-		Skm->SetGenerateOverlapEvents(false);
-		Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
-	HideHealthBar();
-	GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
-	
-	PlayDeathMontage();
-	
-	SetActorTickEnabled(false);
 }
 
 void AEnemy::FreezeDeathAnimationAndSetDestroyTimer() {
@@ -345,15 +357,7 @@ void AEnemy::MoveToTarget(AActor* Target, float AcceptanceRadius) {
 	MoveRequest.SetGoalActor(Target);
 	MoveRequest.SetAcceptanceRadius(AcceptanceRadius);
 	
-	FNavPathSharedPtr NavPath;
-	AIController->MoveTo(MoveRequest, &NavPath);
-	
-	// Debug
-	if (NavPath != nullptr) {
-		for (const FNavPathPoint& Point : NavPath->GetPathPoints()) {
-			DrawDebugSphere(GetWorld(), Point.Location, 25.0f, 12, FColor::Green, false, 10.0f);
-		}
-	}
+	AIController->MoveTo(MoveRequest);
 }
 
 void AEnemy::OnSeePawn(APawn* SeenPawn) {
