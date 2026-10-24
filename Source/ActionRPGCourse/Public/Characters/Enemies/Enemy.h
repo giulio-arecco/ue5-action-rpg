@@ -28,6 +28,7 @@ protected:
 	virtual void PlayDeathMontage() const override;
 	virtual void ReceiveDamage(float DamageAmount) const override;
 	virtual void Die() override;
+	virtual bool CanAttack() const override;
 	virtual void Attack() override;
 	
 private:

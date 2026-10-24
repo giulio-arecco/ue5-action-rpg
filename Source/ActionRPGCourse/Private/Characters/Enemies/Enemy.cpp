@@ -103,8 +103,7 @@ void AEnemy::TransitionToState(EEnemyState NewState) {
 		EnemyState = EEnemyState::EES_Patrolling;
 		CombatTarget = nullptr;
 		HideHealthBar();
-		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
-			
+		if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 		StartPatrolling();
 		
 		break;
@@ -115,8 +114,8 @@ void AEnemy::TransitionToState(EEnemyState NewState) {
 			
 		ShowHealthBar();
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
-		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+		if (PatrolTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+		if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 			
 		MoveToTarget(CombatTarget.Get(), TargetReachedAcceptanceRadius);
 		
@@ -127,7 +126,7 @@ void AEnemy::TransitionToState(EEnemyState NewState) {
 		EnemyState = EEnemyState::EES_InCombat;
 			
 		ShowHealthBar();
-		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+		if (PatrolTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
 		 
 		Attack();
 		
@@ -147,7 +146,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& Im
 		checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
 		
 		ActionState = EEnemyActionState::EEAS_StateLocked;
-		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+		if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 		AIController->StopMovement();
 		
 		PlayHitReactMontage(ImpactPoint);
@@ -160,7 +159,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& Im
 void AEnemy::HitReactMontageEnd() {
 	ActionState = EEnemyActionState::EEAS_Unoccupied;
 	
-	if (const AActor* Target = CombatTarget.Get(); Target == nullptr || !IsInTargetRange(Target, CombatRadius)) return;
+	if (!CanAttack()) return;
 	Attack();
 }
 
@@ -327,6 +326,10 @@ void AEnemy::OnSeePawn(APawn* SeenPawn) {
 	CombatTarget = SeenPawn;
 }
 
+bool AEnemy::CanAttack() const {
+	const AActor* Target = CombatTarget.Get(); 
+	return Target != nullptr && IsInTargetRange(Target, CombatRadius);
+}
 
 void AEnemy::Attack() {
 	if (!ensureAlwaysMsgf(EnemyState == EEnemyState::EES_InCombat, TEXT("[%s] Tried attacking while not in the InCombat state"), *GetName())) return;
@@ -342,13 +345,12 @@ void AEnemy::Attack() {
 void AEnemy::AttackMontageEnd() {
 	ActionState = EEnemyActionState::EEAS_Unoccupied;
 
-	if (const AActor* Target = CombatTarget.Get(); Target == nullptr || !IsInTargetRange(Target, CombatRadius)) return;
+	if (!CanAttack()) return;
 	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &AEnemy::AttackTimerEnd, FMath::RandRange(AttackTimerMin, AttackTimerMax));
 }
 
 void AEnemy::AttackTimerEnd() {
-	if (const AActor* Target = CombatTarget.Get(); Target == nullptr || !IsInTargetRange(Target, CombatRadius)) return;
-	checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
+	if (!CanAttack()) return;
 	Attack();
 }
 
@@ -408,8 +410,8 @@ void AEnemy::Die() {
 	}
 	
 	HideHealthBar();
-	GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
-	GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+	if (PatrolTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+	if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 	
 	PlayDeathMontage();
 	
