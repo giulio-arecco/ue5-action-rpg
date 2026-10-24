@@ -26,16 +26,6 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, Category = "Equipment")
 	TObjectPtr<AWeapon> EquippedWeapon;
 	
-	/*****************************
-	 *   Hit Related Variables   *
-	 ****************************/ 
-	
-	UPROPERTY(EditAnywhere, Category = "Sound")
-	TObjectPtr<USoundBase> HitSound;
-	
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UParticleSystem> HitParticles;
-	
 	/************************************
 	 *    Animation Related Variables   *
 	 ************************************/
@@ -58,10 +48,25 @@ protected:
 	
 	void PlayAttackMontage() const;
 	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
+	void PlayHitSound(const FVector& Location) const;
+	void SpawnHitParticles(const FVector& Location, const FVector& Normal) const;
 	
+	virtual bool IsAlive() const;
+	virtual void ReceiveDamage(float DamageAmount) const;
 	virtual bool CanAttack() const;
 	virtual void Attack();
 	virtual void Die();
 	virtual void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	virtual void PlayDeathMontage() const;
+	
+private:
+	/*****************************
+	 *   Hit Related Variables   *
+	 ****************************/ 
+	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	TObjectPtr<USoundBase> HitSound;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UParticleSystem> HitParticles;
 };

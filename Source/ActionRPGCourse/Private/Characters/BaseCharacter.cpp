@@ -2,6 +2,7 @@
 
 #include "Components/AttributeComponent.h"
 #include "Items/Weapons/Weapon.h"
+#include "Kismet/GameplayStatics.h"
 
 ABaseCharacter::ABaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -72,6 +73,26 @@ double ABaseCharacter::ComputeAngleToImpact(const FVector& ImpactPoint) const {
 	// 3. Polar numerical stability: Acos derivative diverges to infinity at 0° (x = 1) and 180° (x = -1), exaggerating small errors,
 	//    whereas Atan2 provides uniform numerical accuracy around the entire circle
 	return FMath::RadiansToDegrees(FMath::Atan2(SinTheta, CosTheta));
+}
+
+void ABaseCharacter::PlayHitSound(const FVector& Location) const {
+	if (!ensureAlwaysMsgf(HitSound != nullptr, TEXT("[%s] HitSound is null"), *GetName())) return;
+	UGameplayStatics::PlaySoundAtLocation(this, HitSound, Location);
+}
+
+void ABaseCharacter::SpawnHitParticles(const FVector& Location, const FVector& Normal) const {
+	if (!ensureAlwaysMsgf(HitParticles != nullptr, TEXT("[%s] HitParticles is null"), *GetName())) return;
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticles, Location, Normal.Rotation());
+}
+
+bool ABaseCharacter::IsAlive() const {
+	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
+	return AttributeComponent->IsAlive();
+}
+
+void ABaseCharacter::ReceiveDamage(const float DamageAmount) const {
+	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
+	AttributeComponent->ReceiveDamage(DamageAmount);
 }
 
 bool ABaseCharacter::CanAttack() const { return false; }

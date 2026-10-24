@@ -17,6 +17,7 @@ class ACTIONRPGCOURSE_API AEnemy : public ABaseCharacter {
 public:
 	AEnemy();
 	virtual void Tick(float DeltaTime) override;
+	void StartPatrolling();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -25,6 +26,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PlayHitReactMontage(const FVector& ImpactPoint) const override;
 	virtual void PlayDeathMontage() const override;
+	virtual void ReceiveDamage(float DamageAmount) const override;
+	virtual void Die() override;
 	
 private:
 	UPROPERTY(VisibleInstanceOnly)
@@ -69,7 +72,7 @@ private:
 	float TargetReachedMaxWait = 10.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
-	float TargetReachedAcceptanceRadius = 50.0f;
+	float TargetReachedAcceptanceRadius = 30.0f;
 	
 	FTimerHandle PatrolTimerHandle;
 	
@@ -90,7 +93,7 @@ private:
 	float CombatRadius = 2000.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	float AttackRadius = 200.0f;
+	float AttackRadius = 150.0f;
 	
 	/************************************
 	 *    Animation Related Functions   *
@@ -103,6 +106,7 @@ private:
 	 *    AI Related Functions   *
 	 ****************************/ 
 	
+	void InitPatrolling();
 	AActor* PickRandomPatrolTarget() const;
 	void MoveToTarget(AActor* Target, float AcceptanceRadius);
 	
@@ -117,8 +121,6 @@ private:
 	
 	void ShowHealthBar() const;
 	void HideHealthBar() const;
-	
-	virtual void Die() override;
 	
 	/* Target must not be null */
 	bool IsInTargetRange(const AActor* Target, float Range) const;
