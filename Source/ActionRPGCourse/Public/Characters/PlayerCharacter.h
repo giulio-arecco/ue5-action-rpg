@@ -70,7 +70,7 @@ private:
 	ECharacterState CharacterState = ECharacterState::ECS_Disarmed;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	EActionState ActionState = EActionState::EAS_Unoccupied;
+	ECharacterActionState ActionState = ECharacterActionState::ECAS_Unoccupied;
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> ViewCamera;
@@ -115,8 +115,8 @@ public:
 	
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 	
-	FORCEINLINE EActionState GetActionState() const { return ActionState; }
+	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
 	
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetActionState(EActionState State) { ActionState = State; }
+	FORCEINLINE void SetActionState(ECharacterActionState State) { ActionState = State; }
 };

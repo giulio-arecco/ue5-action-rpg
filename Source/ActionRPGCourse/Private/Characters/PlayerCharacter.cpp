@@ -67,7 +67,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 }
 
 void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
-	if (ActionState != EActionState::EAS_Unoccupied) return;
+	if (ActionState != ECharacterActionState::ECAS_Unoccupied) return;
 	
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 	
@@ -107,12 +107,12 @@ void APlayerCharacter::InteractStarted() {
 	}
 	else {
 		if (CanArm()) { 
-			ActionState = EActionState::EAS_ArmingOrDisarming;
+			ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
 			PlayEquipMontage(FName("Equip"));
 			CharacterState = ECharacterState::ECS_Armed;
 		}
 		else if (CanDisarm()) {
-			ActionState = EActionState::EAS_ArmingOrDisarming;
+			ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
 			PlayEquipMontage(FName("Unequip"));
 			CharacterState = ECharacterState::ECS_Disarmed;
 		}
@@ -127,24 +127,24 @@ void APlayerCharacter::Attack() {
 	if (CanAttack()) {
 		Super::Attack();
 		
-		ActionState = EActionState::EAS_Attacking;
+		ActionState = ECharacterActionState::ECAS_Attacking;
 		PlayAttackMontage();
 	}
 }
 
 bool APlayerCharacter::CanAttack() const {
 	return CharacterState == ECharacterState::ECS_Armed &&
-		ActionState == EActionState::EAS_Unoccupied;
+		ActionState == ECharacterActionState::ECAS_Unoccupied;
 }
 
 bool APlayerCharacter::CanArm() const {
-	return ActionState == EActionState::EAS_Unoccupied &&
+	return ActionState == ECharacterActionState::ECAS_Unoccupied &&
 		CharacterState == ECharacterState::ECS_Disarmed &&
 		EquippedWeapon != nullptr;
 }
 
 bool APlayerCharacter::CanDisarm() const {
-	return ActionState == EActionState::EAS_Unoccupied &&
+	return ActionState == ECharacterActionState::ECAS_Unoccupied &&
 		CharacterState == ECharacterState::ECS_Armed &&
 		EquippedWeapon != nullptr;
 }

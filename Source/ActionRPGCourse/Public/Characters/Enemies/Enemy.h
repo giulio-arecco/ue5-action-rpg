@@ -28,10 +28,14 @@ protected:
 	virtual void PlayDeathMontage() const override;
 	virtual void ReceiveDamage(float DamageAmount) const override;
 	virtual void Die() override;
+	virtual void Attack() override;
 	
 private:
 	UPROPERTY(VisibleInstanceOnly)
 	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
+	
+	UPROPERTY(VisibleInstanceOnly)
+	EEnemyActionState ActionState = EEnemyActionState::EEAS_Unoccupied;
 	
 	UPROPERTY(EditAnywhere)
 	float LifeSpanAfterDeath = 10.0f;
@@ -90,10 +94,14 @@ private:
 	TWeakObjectPtr<AActor> CombatTarget;
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	float CombatRadius = 2000.0f;
+	float ChaseRadius = 2000.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	float AttackRadius = 150.0f;
+	float CombatRadius = 150.0f;
+	
+	float AttackTimerMin = 0.75f;
+	float AttackTimerMax = 1.2f;
+	FTimerHandle AttackTimerHandle;
 	
 	/************************************
 	 *    Animation Related Functions   *
@@ -118,6 +126,14 @@ private:
 	/*********************************
 	 *    Combat Related Functions   *
 	 *********************************/ 
+	
+	UFUNCTION(BlueprintCallable)
+	void AttackMontageEnd();
+	
+	UFUNCTION(BlueprintCallable)
+	void HitReactMontageEnd();
+	
+	void AttackTimerEnd();
 	
 	void ShowHealthBar() const;
 	void HideHealthBar() const;

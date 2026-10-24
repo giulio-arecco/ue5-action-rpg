@@ -1,6 +1,7 @@
 ﻿#include "Characters/Enemies/Enemy.h"
 
 #include "AIController.h"
+#include "Characters/CharacterTypes.h"
 #include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -62,28 +63,30 @@ void AEnemy::BeginPlay() {
 
 void AEnemy::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	const AActor* Target = CombatTarget.Get();
 	
-	AActor* Target = CombatTarget.Get();
-	
-	switch (EnemyState) {
-	// The conditions to transition to the Dead state are checked in TakeDamage
-	case EEnemyState::EES_Patrolling:
-		if (Target == nullptr) break;
-		if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_InCombat);
-		else if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
-		break;
-	case EEnemyState::EES_Chasing:
-		if (Target == nullptr) TransitionToState(EEnemyState::EES_Patrolling);
-		else if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_InCombat);
-		else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Patrolling);
-		break;
-	case EEnemyState::EES_InCombat:
-		if (Target == nullptr) TransitionToState(EEnemyState::EES_Patrolling);
-		else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Patrolling);
-		else if (!IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_Chasing);
-		break;
-	case EEnemyState::EES_Dead:
-		break;
+	if (ActionState != EEnemyActionState::EEAS_StateLocked) {
+		switch (EnemyState) {
+			// The conditions to transition to the Dead state are checked in TakeDamage
+		case EEnemyState::EES_Patrolling:
+			if (Target == nullptr) break;
+			if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_InCombat);
+			else if (IsInTargetRange(Target, ChaseRadius)) TransitionToState(EEnemyState::EES_Chasing);
+			break;
+		case EEnemyState::EES_Chasing:
+			if (Target == nullptr) TransitionToState(EEnemyState::EES_Patrolling);
+			else if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_InCombat);
+			else if (!IsInTargetRange(Target, ChaseRadius)) TransitionToState(EEnemyState::EES_Patrolling);
+			break;
+		case EEnemyState::EES_InCombat:
+			if (Target == nullptr) TransitionToState(EEnemyState::EES_Patrolling);
+			else if (!IsInTargetRange(Target, ChaseRadius)) TransitionToState(EEnemyState::EES_Patrolling);
+			else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
+			break;
+		case EEnemyState::EES_Dead:
+			break;
+		}
 	}
 }
 
@@ -100,6 +103,7 @@ void AEnemy::TransitionToState(EEnemyState NewState) {
 		EnemyState = EEnemyState::EES_Patrolling;
 		CombatTarget = nullptr;
 		HideHealthBar();
+		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 			
 		StartPatrolling();
 		
@@ -112,6 +116,7 @@ void AEnemy::TransitionToState(EEnemyState NewState) {
 		ShowHealthBar();
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 			
 		MoveToTarget(CombatTarget.Get(), TargetReachedAcceptanceRadius);
 		
@@ -123,10 +128,8 @@ void AEnemy::TransitionToState(EEnemyState NewState) {
 			
 		ShowHealthBar();
 		GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
-		
-		AIController->StopMovement();
-		
-		// PlayAttackMontage();
+		 
+		Attack();
 		
 		break;
 	case EEnemyState::EES_Dead:
@@ -141,11 +144,24 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
 	if (EnemyState != EEnemyState::EES_Dead && IsAlive()) {
+		checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
+		
+		ActionState = EEnemyActionState::EEAS_StateLocked;
+		GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+		AIController->StopMovement();
+		
 		PlayHitReactMontage(ImpactPoint);
 	}
 	
 	PlayHitSound(ImpactPoint);
 	SpawnHitParticles(ImpactPoint, ImpactNormal);
+}
+
+void AEnemy::HitReactMontageEnd() {
+	ActionState = EEnemyActionState::EEAS_Unoccupied;
+	
+	if (const AActor* Target = CombatTarget.Get(); Target == nullptr || !IsInTargetRange(Target, CombatRadius)) return;
+	Attack();
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
@@ -160,16 +176,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	}
 	
 	ReceiveDamage(DamageAmount);
-	
-	if (IsAlive()) {
-		if (const AActor* Target = CombatTarget.Get(); Target != nullptr) {
-			if (IsInTargetRange(Target, AttackRadius)) TransitionToState(EEnemyState::EES_InCombat);
-			else if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
-		}
-	}
-	else {
-		TransitionToState(EEnemyState::EES_Dead);
-	}
+	if (!IsAlive()) TransitionToState(EEnemyState::EES_Dead);
 	
 	return DamageAmount;
 }
@@ -189,7 +196,6 @@ void AEnemy::PlayDeathMontage() const {
 		HideHealthBar();
 	}
 }
-
 
 void AEnemy::FreezeDeathAnimationAndSetDestroyTimer() {
 	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
@@ -319,7 +325,31 @@ void AEnemy::OnSeePawn(APawn* SeenPawn) {
 	UE_LOG(LogTemp, Warning, TEXT("Seen Character"));
 	
 	CombatTarget = SeenPawn;
-	TransitionToState(EEnemyState::EES_Chasing);
+}
+
+
+void AEnemy::Attack() {
+	if (!ensureAlwaysMsgf(EnemyState == EEnemyState::EES_InCombat, TEXT("[%s] Tried attacking while not in the InCombat state"), *GetName())) return;
+	checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
+
+	Super::Attack();
+	
+	ActionState = EEnemyActionState::EEAS_StateLocked;
+	AIController->StopMovement();
+	PlayAttackMontage();
+}
+
+void AEnemy::AttackMontageEnd() {
+	ActionState = EEnemyActionState::EEAS_Unoccupied;
+
+	if (const AActor* Target = CombatTarget.Get(); Target == nullptr || !IsInTargetRange(Target, CombatRadius)) return;
+	GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &AEnemy::AttackTimerEnd, FMath::RandRange(AttackTimerMin, AttackTimerMax));
+}
+
+void AEnemy::AttackTimerEnd() {
+	if (const AActor* Target = CombatTarget.Get(); Target == nullptr || !IsInTargetRange(Target, CombatRadius)) return;
+	checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
+	Attack();
 }
 
 void AEnemy::ShowHealthBar() const {
@@ -379,6 +409,7 @@ void AEnemy::Die() {
 	
 	HideHealthBar();
 	GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+	GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 	
 	PlayDeathMontage();
 	
