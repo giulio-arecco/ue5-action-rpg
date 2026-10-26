@@ -16,14 +16,13 @@ class ACTIONRPGCOURSE_API AEnemy : public ABaseCharacter {
 
 public:
 	AEnemy();
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void StartPatrolling();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 protected:
-	virtual void BeginPlay() override;
 	virtual void PlayHitReactMontage(const FVector& ImpactPoint) const override;
 	virtual void PlayDeathMontage() const override;
 	virtual void ReceiveDamage(float DamageAmount) const override;
@@ -116,6 +115,7 @@ private:
 	 ****************************/ 
 	
 	void InitPatrolling();
+	void StartPatrolling();
 	AActor* PickRandomPatrolTarget() const;
 	void MoveToTarget(AActor* Target, float AcceptanceRadius);
 	

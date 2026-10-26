@@ -90,6 +90,13 @@ void AEnemy::Tick(float DeltaTime) {
 	}
 }
 
+bool AEnemy::IsInTargetRange(const AActor* Target, float Range) const {
+	check(Target);
+	
+	const double DistSq = FVector::DistSquared(GetActorLocation(), Target->GetActorLocation());
+	return DistSq < FMath::Square(Range);
+}
+
 void AEnemy::TransitionToState(EEnemyState NewState) {
 	if (EnemyState == NewState) return;
 	
@@ -156,6 +163,31 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& Im
 	SpawnHitParticles(ImpactPoint, ImpactNormal);
 }
 
+void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
+	const double Theta = ComputeAngleToImpact(ImpactPoint);
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr && HitReactMontage != nullptr) {
+		AnimInstance->Montage_Play(HitReactMontage);
+		
+		FName Section;
+		if (Theta >= -45.0 && Theta < 45.0) {
+			Section = FName("FromFront");
+		}
+		else if (Theta >= 45.0 && Theta < 135.0) {
+			Section = FName("FromRight");
+		}
+		else if (Theta >= -135.0 && Theta < -45.0) {
+			Section = FName("FromLeft");
+		}
+		else {
+			Section = FName("FromBack");
+		}
+		
+		AnimInstance->Montage_JumpToSection(Section);
+	}
+}
+
 void AEnemy::HitReactMontageEnd() {
 	ActionState = EEnemyActionState::EEAS_Unoccupied;
 	
@@ -178,6 +210,54 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	if (!IsAlive()) TransitionToState(EEnemyState::EES_Dead);
 	
 	return DamageAmount;
+}
+
+void AEnemy::ReceiveDamage(float DamageAmount) const {
+	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
+	checkf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName());
+	
+	Super::ReceiveDamage(DamageAmount);
+	
+	if (IsAlive()) {
+		HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
+		ShowHealthBar();
+	}
+}
+
+void AEnemy::Die() {
+	Super::Die();
+	
+	UE_LOG(LogTemp, Warning, TEXT("Dead"));
+		
+	EnemyState = EEnemyState::EES_Dead;
+		
+	DetachFromControllerPendingDestroy();
+	
+	if (UCharacterMovementComponent* CharMove = GetCharacterMovement(); CharMove != nullptr) {
+		CharMove->DisableMovement();
+		CharMove->StopMovementImmediately();
+	}
+	
+	if (PawnSensingComponent != nullptr) {
+		PawnSensingComponent->SetSensingUpdatesEnabled(false);
+	}
+	
+	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent(); CapsuleComp != nullptr) {
+		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
+		Skm->SetGenerateOverlapEvents(false);
+		Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	HideHealthBar();
+	if (PatrolTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
+	if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+	
+	PlayDeathMontage();
+	
+	SetActorTickEnabled(false);
 }
 
 void AEnemy::PlayDeathMontage() const {
@@ -206,31 +286,6 @@ void AEnemy::FreezeDeathAnimationAndSetDestroyTimer() {
 	// meaning it can be disabled. We use K2_DestroyActor instead of Destroy to match the delegate signature.
 	FTimerHandle DeathTimerHandle;
 	GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &AActor::K2_DestroyActor, LifeSpanAfterDeath, false);
-}
-
-void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
-	const double Theta = ComputeAngleToImpact(ImpactPoint);
-	
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && HitReactMontage != nullptr) {
-		AnimInstance->Montage_Play(HitReactMontage);
-		
-		FName Section;
-		if (Theta >= -45.0 && Theta < 45.0) {
-			Section = FName("FromFront");
-		}
-		else if (Theta >= 45.0 && Theta < 135.0) {
-			Section = FName("FromRight");
-		}
-		else if (Theta >= -135.0 && Theta < -45.0) {
-			Section = FName("FromLeft");
-		}
-		else {
-			Section = FName("FromBack");
-		}
-		
-		AnimInstance->Montage_JumpToSection(Section);
-	}
 }
 
 void AEnemy::InitPatrolling() {
@@ -368,59 +423,4 @@ void AEnemy::HideHealthBar() const {
 	if (HealthBarComponent->IsVisible()) {
 		HealthBarComponent->SetVisibility(false);
 	}
-}
-
-void AEnemy::ReceiveDamage(float DamageAmount) const {
-	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
-	checkf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName());
-	
-	Super::ReceiveDamage(DamageAmount);
-	
-	if (IsAlive()) {
-		HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
-		ShowHealthBar();
-	}
-}
-
-void AEnemy::Die() {
-	Super::Die();
-	
-	UE_LOG(LogTemp, Warning, TEXT("Dead"));
-		
-	EnemyState = EEnemyState::EES_Dead;
-		
-	DetachFromControllerPendingDestroy();
-	
-	if (UCharacterMovementComponent* CharMove = GetCharacterMovement(); CharMove != nullptr) {
-		CharMove->DisableMovement();
-		CharMove->StopMovementImmediately();
-	}
-	
-	if (PawnSensingComponent != nullptr) {
-		PawnSensingComponent->SetSensingUpdatesEnabled(false);
-	}
-	
-	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent(); CapsuleComp != nullptr) {
-		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
-	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
-		Skm->SetGenerateOverlapEvents(false);
-		Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
-	HideHealthBar();
-	if (PatrolTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
-	if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
-	
-	PlayDeathMontage();
-	
-	SetActorTickEnabled(false);
-}
-
-bool AEnemy::IsInTargetRange(const AActor* Target, float Range) const {
-	check(Target);
-	
-	const double DistSq = FVector::DistSquared(GetActorLocation(), Target->GetActorLocation());
-	return DistSq < FMath::Square(Range);
 }
