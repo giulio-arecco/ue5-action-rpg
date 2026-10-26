@@ -21,12 +21,18 @@ class ACTIONRPGCOURSE_API APlayerCharacter : public ABaseCharacter {
 
 public:
 	APlayerCharacter();
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-protected:
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetActionState(ECharacterActionState State) { ActionState = State; }
 	
+	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
+	
+protected:
 	virtual bool CanAttack() const override;
 	virtual void Attack() override;
 	
@@ -87,6 +93,10 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Equipment")
 	TObjectPtr<AItem> OverlappingItem;
 	
+	bool CanArm() const;
+	bool CanDisarm() const;
+	void EquipWeapon(AWeapon* OverlappingWeapon);
+	
 	/*************************
 	 *    Input Callbacks    *
 	 ************************/ 
@@ -101,22 +111,12 @@ private:
 	 ********************************/
 
 	void PlayEquipMontage(FName SectionName) const;
-	
-	bool CanArm() const;
-	bool CanDisarm() const;
+	void Arm();
+	void Disarm();
 	
 	UFUNCTION(BlueprintCallable)
 	void AttachWeaponToHand() const;
 	
 	UFUNCTION(BlueprintCallable)
 	void AttachWeaponToSpine() const;
-public:
-	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
-	
-	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
-	
-	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
-	
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetActionState(ECharacterActionState State) { ActionState = State; }
 };

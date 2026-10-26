@@ -100,41 +100,27 @@ void APlayerCharacter::LookTriggered(const FInputActionValue& Value) {
 void APlayerCharacter::InteractStarted() {
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	if (OverlappingWeapon != nullptr) {
-		OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName, this, this);
-		CharacterState = ECharacterState::ECS_Armed;
-		EquippedWeapon = OverlappingWeapon;
-		OverlappingItem = nullptr;
+		EquipWeapon(OverlappingWeapon);
 	}
 	else {
-		if (CanArm()) { 
-			ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
-			PlayEquipMontage(FName("Equip"));
-			CharacterState = ECharacterState::ECS_Armed;
-		}
-		else if (CanDisarm()) {
-			ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
-			PlayEquipMontage(FName("Unequip"));
-			CharacterState = ECharacterState::ECS_Disarmed;
-		}
+		if (CanArm()) Arm();
+		else if (CanDisarm()) Disarm();
 	}
 }
 
-void APlayerCharacter::AttackStarted() {
-	Attack();
+void APlayerCharacter::EquipWeapon(AWeapon* OverlappingWeapon) {
+	OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName, this, this);
+	CharacterState = ECharacterState::ECS_Armed;
+	EquippedWeapon = OverlappingWeapon;
+	OverlappingItem = nullptr;
 }
 
-void APlayerCharacter::Attack() {
-	if (CanAttack()) {
-		Super::Attack();
-		
-		ActionState = ECharacterActionState::ECAS_Attacking;
-		PlayAttackMontage();
+void APlayerCharacter::PlayEquipMontage(FName SectionName) const {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr && EquipMontage != nullptr) {
+		AnimInstance->Montage_Play(EquipMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
 	}
-}
-
-bool APlayerCharacter::CanAttack() const {
-	return CharacterState == ECharacterState::ECS_Armed &&
-		ActionState == ECharacterActionState::ECAS_Unoccupied;
 }
 
 bool APlayerCharacter::CanArm() const {
@@ -149,11 +135,33 @@ bool APlayerCharacter::CanDisarm() const {
 		EquippedWeapon != nullptr;
 }
 
-void APlayerCharacter::PlayEquipMontage(FName SectionName) const {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && EquipMontage != nullptr) {
-		AnimInstance->Montage_Play(EquipMontage);
-		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
+void APlayerCharacter::Arm() {
+	ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
+	CharacterState = ECharacterState::ECS_Armed;
+	PlayEquipMontage(FName("Equip"));
+}
+
+void APlayerCharacter::Disarm() {
+	ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
+	CharacterState = ECharacterState::ECS_Disarmed;
+	PlayEquipMontage(FName("Unequip"));
+}
+
+void APlayerCharacter::AttackStarted() {
+	Attack();
+}
+
+bool APlayerCharacter::CanAttack() const {
+	return CharacterState == ECharacterState::ECS_Armed &&
+		ActionState == ECharacterActionState::ECAS_Unoccupied;
+}
+
+void APlayerCharacter::Attack() {
+	if (CanAttack()) {
+		Super::Attack();
+		
+		ActionState = ECharacterActionState::ECAS_Attacking;
+		PlayAttackMontage();
 	}
 }
 
