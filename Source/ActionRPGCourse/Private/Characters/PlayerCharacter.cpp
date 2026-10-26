@@ -66,6 +66,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 }
 
+void APlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	Super::GetHit_Implementation(ImpactPoint, ImpactNormal);
+	
+	PlayHitSound(ImpactPoint);
+	SpawnHitParticles(ImpactPoint, ImpactNormal);
+}
+
 void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
 	if (ActionState != ECharacterActionState::ECAS_Unoccupied) return;
 	

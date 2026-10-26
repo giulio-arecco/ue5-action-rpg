@@ -24,14 +24,9 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Box Trace")
-	FVector BoxTraceHalfSize = FVector(5.0f, 5.0f, 5.0f);
+	FVector BoxTraceHalfSize = FVector(5.0f);
 	
 	virtual void BeginPlay() override;
-	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) override;
-	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
-	
-	UFUNCTION()
-	void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void CreateWeaponFields(const FVector& FieldLocation);
@@ -52,6 +47,15 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Weapon Box Trace")
 	TArray<AActor*> ActorsToIgnore;
 	
+	UPROPERTY(EditAnywhere, Category = "Weapon Box Trace")
+	bool bShowBoxDebug = false;
+	
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.0f;
+	
+	UFUNCTION()
+	void OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	
+	bool DoBoxTrace(FHitResult& OutHitResult);
+	void HitActor(AActor* Actor, const FVector& ImpactPoint, const FVector& ImpactNormal);
 };

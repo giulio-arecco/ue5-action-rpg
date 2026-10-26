@@ -1,13 +1,29 @@
 ﻿#include "Characters/BaseCharacter.h"
 
 #include "Components/AttributeComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Items/Weapons/Weapon.h"
 #include "Kismet/GameplayStatics.h"
 
 ABaseCharacter::ABaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
 	
+	// Yeah, naming this "EnemyAttributes" was a mistake, but I couldn't bother reparenting derived BP classes, so...
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
+	
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	Capsule->SetCollisionObjectType(ECC_Pawn);
+	Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Capsule->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+	Capsule->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	
+	USkeletalMeshComponent* Skm = GetMesh();
+	Skm->SetCollisionObjectType(ECC_WorldDynamic);
+	Skm->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Skm->SetCollisionResponseToAllChannels(ECR_Ignore);
+	Skm->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+	Skm->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	Skm->SetGenerateOverlapEvents(true);
 }
 
 void ABaseCharacter::BeginPlay() {

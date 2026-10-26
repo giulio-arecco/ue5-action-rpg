@@ -13,7 +13,6 @@
 AEnemy::AEnemy() {
 	PrimaryActorTick.bCanEverTick = true;
 	
-
 	HealthBarComponent = CreateDefaultSubobject<UHealthBarComponent>(TEXT("EnemyHealthBarWidget"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
 	
@@ -21,18 +20,6 @@ AEnemy::AEnemy() {
 	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("EnemyPawnSensingComponent"));
 	PawnSensingComponent->SetPeripheralVisionAngle(60.0f);
 	PawnSensingComponent->SightRadius = 1500.0f;
-	
-	UCapsuleComponent* Capsule = GetCapsuleComponent();
-	Capsule->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
-	Capsule->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	
-	USkeletalMeshComponent* Skm = GetMesh();
-	Skm->SetCollisionObjectType(ECC_WorldDynamic);
-	Skm->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	Skm->SetCollisionResponseToAllChannels(ECR_Ignore);
-	Skm->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
-	Skm->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-	Skm->SetGenerateOverlapEvents(true);	
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationPitch = false;
@@ -46,6 +33,8 @@ void AEnemy::BeginPlay() {
 	checkf(AttributeComponent != nullptr, TEXT("AttributeComponent is null in AEnemy::BeginPlay"));
 	checkf(HealthBarComponent != nullptr, TEXT("HealthBarComponent is null in AEnemy::BeginPlay"));
 	checkf(PawnSensingComponent != nullptr, TEXT("PawnSensingComponent is null in AEnemy::BeginPlay"));
+
+	Tags.Add(FName("Enemy"));
 	
 	if (WeaponClass != nullptr) {
 		AWeapon* Weapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
@@ -149,6 +138,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	Super::GetHit_Implementation(ImpactPoint, ImpactNormal);
+	
 	if (EnemyState != EEnemyState::EES_Dead && IsAlive()) {
 		checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
 		
