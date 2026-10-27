@@ -57,7 +57,9 @@ void ABaseCharacter::SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type C
  * Playing hit react animations is responsibility of child classes, as it would likely need additional
  * logic to prevent other actions from interrupting it.
  */
-void ABaseCharacter::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
+void ABaseCharacter::GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	SetEquippedWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 	PlayHitSound(ImpactPoint);
 	SpawnHitParticles(ImpactPoint, ImpactNormal);
 }
@@ -75,13 +77,13 @@ void ABaseCharacter::PlayAttackMontage() const {
 	}
 }
 
-void ABaseCharacter::PlayHitReactMontage(const FVector& ImpactPoint) const {
+void ABaseCharacter::PlayHitReactMontage(const FVector& HitterPosition) const {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	checkf(AnimInstance != nullptr, TEXT("[%s] AnimInstance is null"), *GetName());
 	
 	if (!ensureAlwaysMsgf(HitReactMontage != nullptr, TEXT("[%s] HitReactMontage is null"), *GetName())) return;
 	
-	const double Theta = ComputeAngleToImpact(ImpactPoint);
+	const double Theta = ComputeAngleTo(HitterPosition);
 	
 	AnimInstance->Montage_Play(HitReactMontage);
 	
@@ -102,20 +104,20 @@ void ABaseCharacter::PlayHitReactMontage(const FVector& ImpactPoint) const {
 	AnimInstance->Montage_JumpToSection(Section);
 }
 
-double ABaseCharacter::ComputeAngleToImpact(const FVector& ImpactPoint) const {
+double ABaseCharacter::ComputeAngleTo(const FVector& InPoint) const {
 	const FVector Location = GetActorLocation();
 	const FVector Up = GetActorUpVector();
-	const FVector ToHit = FVector::VectorPlaneProject(ImpactPoint - Location, Up).GetSafeNormal();
+	const FVector ToPoint = FVector::VectorPlaneProject(InPoint - Location, Up).GetSafeNormal();
 
-	if (ToHit.IsNearlyZero()) return 0.0;
+	if (ToPoint.IsNearlyZero()) return 0.0;
 
 	const FVector Forward = GetActorForwardVector(); // already normalized
-	const FVector Cross = FVector::CrossProduct(Forward, ToHit);
+	const FVector Cross = FVector::CrossProduct(Forward, ToPoint);
 	// Since Cross is aligned with Up and Up is a unit vector, their dot product is: 
 	// |Cross| * |Up| * cosAlpha = |Cross| * 1 * (±1) = ±|Cross|
 	// and the sign information is needed for Atan2
 	const double SinTheta = FVector::DotProduct(Cross, Up);
-	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	const double CosTheta = FVector::DotProduct(Forward, ToPoint);
 
 	// We use Atan2 over Acos or Atan because:
 	// 1. Eliminates division-by-zero: standard atan(y/x) breaks when CosTheta == 0;

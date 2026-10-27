@@ -15,7 +15,7 @@ class ACTIONRPGCOURSE_API ABreakableActor : public AActor, public IHitInterface 
 
 public:
 	ABreakableActor();
-	virtual void GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
+	virtual void GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 	
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;

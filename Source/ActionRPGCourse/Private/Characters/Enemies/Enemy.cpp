@@ -137,8 +137,8 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
-	Super::GetHit_Implementation(ImpactPoint, ImpactNormal);
+void AEnemy::GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	Super::GetHit_Implementation(Hitter, ImpactPoint, ImpactNormal);
 	
 	if (EnemyState != EEnemyState::EES_Dead && IsAlive()) {
 		checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
@@ -147,7 +147,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& Im
 		if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 		AIController->StopMovement();
 		
-		PlayHitReactMontage(ImpactPoint);
+		PlayHitReactMontage(Hitter->GetActorLocation());
 	}
 }
 

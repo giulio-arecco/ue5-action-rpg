@@ -67,13 +67,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 }
 
-void APlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
-	Super::GetHit_Implementation(ImpactPoint, ImpactNormal);
+void APlayerCharacter::GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	Super::GetHit_Implementation(Hitter, ImpactPoint, ImpactNormal);
 	
 	// TODO: Remember to check if in Death state once it will be implemented
 	if (IsAlive()) {
 		ActionState = ECharacterActionState::ECAS_ReactingToHit;
-		PlayHitReactMontage(ImpactPoint);
+		PlayHitReactMontage(Hitter->GetActorLocation());
 	}
 }
 

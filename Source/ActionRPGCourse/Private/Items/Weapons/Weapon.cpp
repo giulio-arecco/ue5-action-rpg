@@ -85,20 +85,20 @@ bool AWeapon::DoBoxTrace(FHitResult& OutHitResult) {
 	return HitSomething;
 }
 
-void AWeapon::HitActor(AActor* Actor, const FVector& ImpactPoint, const FVector& ImpactNormal) {
-	checkf(Actor != nullptr, TEXT("[%s] Actor was null in HitActor"), *GetName());
+void AWeapon::HitActor(AActor* ActorToHit, const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	checkf(ActorToHit != nullptr, TEXT("[%s] ActorToHit was null in HitActor"), *GetName());
 	
 	// Calls HitActor.TakeDamage
 	UGameplayStatics::ApplyDamage(
-		Actor, 
+		ActorToHit, 
 		Damage, 
 		GetInstigator()->GetController(), 
 		this,
 		UDamageType::StaticClass()
 	);
 	
-	if (Actor->Implements<UHitInterface>()) {
-		IHitInterface::Execute_GetHit(Actor, ImpactPoint, ImpactNormal);
+	if (ActorToHit->Implements<UHitInterface>()) {
+		IHitInterface::Execute_GetHit(ActorToHit, GetOwner(), ImpactPoint, ImpactNormal);
 	}
 }
 

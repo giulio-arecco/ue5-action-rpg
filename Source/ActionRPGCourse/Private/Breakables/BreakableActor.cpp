@@ -40,7 +40,7 @@ void ABreakableActor::PostEditChangeProperty(struct FPropertyChangedEvent& Prope
 }
 #endif
 
-void ABreakableActor::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
+void ABreakableActor::GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) {
 	UGameplayStatics::PlaySoundAtLocation(this, BreakSound, ImpactPoint);
 }
 

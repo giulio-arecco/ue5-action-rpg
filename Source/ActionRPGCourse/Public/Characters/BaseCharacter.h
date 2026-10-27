@@ -18,7 +18,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	virtual void GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
+	virtual void GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -48,7 +48,7 @@ protected:
 	virtual void HitReactMontageEnd();
 	
 	virtual void PlayAttackMontage() const;
-	virtual void PlayHitReactMontage(const FVector& ImpactPoint) const;
+	virtual void PlayHitReactMontage(const FVector& HitterPosition) const;
 	virtual bool IsAlive() const;
 	virtual void ReceiveDamage(float DamageAmount) const;
 	virtual bool CanAttack() const;
@@ -59,7 +59,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
 	
-	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
+	double ComputeAngleTo(const FVector& InPoint) const;
 	void PlayHitSound(const FVector& Location) const;
 	void SpawnHitParticles(const FVector& Location, const FVector& Normal) const;
 	
