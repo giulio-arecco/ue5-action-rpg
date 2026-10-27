@@ -22,6 +22,10 @@ public:
 	virtual void GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
+	
+	UFUNCTION(BlueprintPure)
+	FVector ComputeMotionWarpingTarget() const;
+	
 protected:
 	virtual void PlayDeathMontage() const override;
 	virtual void ReceiveDamage(float DamageAmount) const override;
@@ -39,6 +43,9 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float LifeSpanAfterDeath = 10.0f;
+	
+	UPROPERTY(EditAnywhere)
+	double WarpTargetOffset = 50.0f;
 	
 	/*****************************
 	 *         Components        *

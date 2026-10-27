@@ -376,6 +376,16 @@ void AEnemy::AttackTimerEnd() {
 	Attack();
 }
 
+FVector AEnemy::ComputeMotionWarpingTarget() const {
+	checkf(CombatTarget != nullptr, TEXT("[%s] ComputeMotionWarpingTarget called when CombatTarget is null"), *GetName());
+	
+	const FVector TargetLocation = CombatTarget->GetActorLocation();
+	const FVector Location = GetActorLocation();
+	const FVector DirFromTargetToThis = (Location - TargetLocation).GetSafeNormal();
+	
+	return TargetLocation + (DirFromTargetToThis * WarpTargetOffset);
+}
+
 void AEnemy::ShowHealthBar() const {
 	checkf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName());
 	
