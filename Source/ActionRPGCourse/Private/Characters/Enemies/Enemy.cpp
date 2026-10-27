@@ -57,7 +57,6 @@ void AEnemy::Tick(float DeltaTime) {
 	
 	if (ActionState != EEnemyActionState::EEAS_StateLocked) {
 		switch (EnemyState) {
-			// The conditions to transition to the Dead state are checked in TakeDamage
 		case EEnemyState::EES_Patrolling:
 			if (Target == nullptr) break;
 			if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_InCombat);
@@ -74,6 +73,7 @@ void AEnemy::Tick(float DeltaTime) {
 			else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
 			break;
 		case EEnemyState::EES_Dead:
+			// The conditions to transition to the Dead state are checked in TakeDamage
 			break;
 		}
 	}
@@ -149,34 +149,6 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint, const FVector& Im
 		
 		PlayHitReactMontage(ImpactPoint);
 	}
-	
-	PlayHitSound(ImpactPoint);
-	SpawnHitParticles(ImpactPoint, ImpactNormal);
-}
-
-void AEnemy::PlayHitReactMontage(const FVector& ImpactPoint) const {
-	const double Theta = ComputeAngleToImpact(ImpactPoint);
-	
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && HitReactMontage != nullptr) {
-		AnimInstance->Montage_Play(HitReactMontage);
-		
-		FName Section;
-		if (Theta >= -45.0 && Theta < 45.0) {
-			Section = FName("FromFront");
-		}
-		else if (Theta >= 45.0 && Theta < 135.0) {
-			Section = FName("FromRight");
-		}
-		else if (Theta >= -135.0 && Theta < -45.0) {
-			Section = FName("FromLeft");
-		}
-		else {
-			Section = FName("FromBack");
-		}
-		
-		AnimInstance->Montage_JumpToSection(Section);
-	}
 }
 
 void AEnemy::HitReactMontageEnd() {
@@ -240,6 +212,10 @@ void AEnemy::Die() {
 	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
 		Skm->SetGenerateOverlapEvents(false);
 		Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	if (EquippedWeapon != nullptr) {
+		SetEquippedWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	
 	HideHealthBar();

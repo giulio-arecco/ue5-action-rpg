@@ -23,12 +23,12 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 protected:
-	virtual void PlayHitReactMontage(const FVector& ImpactPoint) const override;
 	virtual void PlayDeathMontage() const override;
 	virtual void ReceiveDamage(float DamageAmount) const override;
 	virtual void Die() override;
 	virtual bool CanAttack() const override;
 	virtual void Attack() override;
+	virtual void HitReactMontageEnd() override;
 	
 private:
 	UPROPERTY(VisibleInstanceOnly)
@@ -130,9 +130,6 @@ private:
 	
 	UFUNCTION(BlueprintCallable)
 	void AttackMontageEnd();
-	
-	UFUNCTION(BlueprintCallable)
-	void HitReactMontageEnd();
 	
 	void AttackTimerEnd();
 	

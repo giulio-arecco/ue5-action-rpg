@@ -18,6 +18,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	virtual void GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -44,20 +45,23 @@ protected:
 	 ******************/
 	
 	UFUNCTION(BlueprintCallable)
-	void SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
+	virtual void HitReactMontageEnd();
 	
-	void PlayAttackMontage() const;
-	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
-	void PlayHitSound(const FVector& Location) const;
-	void SpawnHitParticles(const FVector& Location, const FVector& Normal) const;
-	
+	virtual void PlayAttackMontage() const;
+	virtual void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	virtual bool IsAlive() const;
 	virtual void ReceiveDamage(float DamageAmount) const;
 	virtual bool CanAttack() const;
 	virtual void Attack();
 	virtual void Die();
-	virtual void PlayHitReactMontage(const FVector& ImpactPoint) const;
 	virtual void PlayDeathMontage() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
+	
+	double ComputeAngleToImpact(const FVector& ImpactPoint) const;
+	void PlayHitSound(const FVector& Location) const;
+	void SpawnHitParticles(const FVector& Location, const FVector& Normal) const;
 	
 private:
 	/*****************************

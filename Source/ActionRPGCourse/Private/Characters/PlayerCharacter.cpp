@@ -62,6 +62,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::InteractStarted);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::AttackStarted);
 	// We use the ACharacter::Jump function to handle jumping, since currently there's no need for a APlayerCharacter::JumpTriggered function 
+	// TODO: disallow jumping when playing other animations / performing other actions
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 }
@@ -69,8 +70,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
 	Super::GetHit_Implementation(ImpactPoint, ImpactNormal);
 	
-	PlayHitSound(ImpactPoint);
-	SpawnHitParticles(ImpactPoint, ImpactNormal);
+	// TODO: Remember to check if in Death state once it will be implemented
+	if (IsAlive()) {
+		ActionState = ECharacterActionState::ECAS_ReactingToHit;
+		PlayHitReactMontage(ImpactPoint);
+	}
 }
 
 void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
@@ -105,6 +109,8 @@ void APlayerCharacter::LookTriggered(const FInputActionValue& Value) {
 }
 
 void APlayerCharacter::InteractStarted() {
+	if (ActionState != ECharacterActionState::ECAS_Unoccupied) return;
+	
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	if (OverlappingWeapon != nullptr) {
 		EquipWeapon(OverlappingWeapon);
@@ -170,6 +176,11 @@ void APlayerCharacter::Attack() {
 		ActionState = ECharacterActionState::ECAS_Attacking;
 		PlayAttackMontage();
 	}
+}
+
+void APlayerCharacter::HitReactMontageEnd() {
+	Super::HitReactMontageEnd();
+	ActionState = ECharacterActionState::ECAS_Unoccupied;
 }
 
 void APlayerCharacter::AttachWeaponToHand() const {

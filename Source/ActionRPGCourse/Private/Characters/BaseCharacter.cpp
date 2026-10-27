@@ -53,6 +53,15 @@ void ABaseCharacter::SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type C
 	}
 }
 
+/** 
+ * Playing hit react animations is responsibility of child classes, as it would likely need additional
+ * logic to prevent other actions from interrupting it.
+ */
+void ABaseCharacter::GetHit_Implementation(const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	PlayHitSound(ImpactPoint);
+	SpawnHitParticles(ImpactPoint, ImpactNormal);
+}
+
 void ABaseCharacter::PlayAttackMontage() const {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance != nullptr && AttackMontage != nullptr) {
@@ -64,6 +73,33 @@ void ABaseCharacter::PlayAttackMontage() const {
 			AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 		}
 	}
+}
+
+void ABaseCharacter::PlayHitReactMontage(const FVector& ImpactPoint) const {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	checkf(AnimInstance != nullptr, TEXT("[%s] AnimInstance is null"), *GetName());
+	
+	if (!ensureAlwaysMsgf(HitReactMontage != nullptr, TEXT("[%s] HitReactMontage is null"), *GetName())) return;
+	
+	const double Theta = ComputeAngleToImpact(ImpactPoint);
+	
+	AnimInstance->Montage_Play(HitReactMontage);
+	
+	FName Section;
+	if (Theta >= -45.0 && Theta < 45.0) {
+		Section = FName("FromFront");
+	}
+	else if (Theta >= 45.0 && Theta < 135.0) {
+		Section = FName("FromRight");
+	}
+	else if (Theta >= -135.0 && Theta < -45.0) {
+		Section = FName("FromLeft");
+	}
+	else {
+		Section = FName("FromBack");
+	}
+	
+	AnimInstance->Montage_JumpToSection(Section);
 }
 
 double ABaseCharacter::ComputeAngleToImpact(const FVector& ImpactPoint) const {
@@ -111,11 +147,8 @@ void ABaseCharacter::ReceiveDamage(const float DamageAmount) const {
 	AttributeComponent->ReceiveDamage(DamageAmount);
 }
 
+void ABaseCharacter::HitReactMontageEnd() {}
 bool ABaseCharacter::CanAttack() const { return false; }
 void ABaseCharacter::Attack() {}
 void ABaseCharacter::Die() {}
-void ABaseCharacter::PlayHitReactMontage(const FVector& ImpactPoint) const {}
 void ABaseCharacter::PlayDeathMontage() const {}
-
-
-

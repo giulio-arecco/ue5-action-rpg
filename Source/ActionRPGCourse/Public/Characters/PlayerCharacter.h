@@ -36,6 +36,7 @@ public:
 protected:
 	virtual bool CanAttack() const override;
 	virtual void Attack() override;
+	virtual void HitReactMontageEnd() override;
 	
 	/*****************************
 	 *  Input-related Variables  *
@@ -110,7 +111,7 @@ private:
 	/*********************************
 	 *  Animation-related Functions  *
 	 ********************************/
-
+	
 	void PlayEquipMontage(FName SectionName) const;
 	void Arm();
 	void Disarm();
