@@ -2,20 +2,20 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "ViewportOverlay.generated.h"
+#include "PlayerViewportWidget.generated.h"
 
 class UTextBlock;
 class UProgressBar;
 
 UCLASS()
-class ACTIONRPGCOURSE_API UViewportOverlay : public UUserWidget {
+class ACTIONRPGCOURSE_API UPlayerViewportWidget : public UUserWidget {
 	GENERATED_BODY()
 	
 public:
-	void SetHealthBarPercent(float Percent) const;
-	void SetStaminaBarPercent(float Percent) const;
-	void SetGoldText(int32 GoldAmount) const;
-	void SetSoulsText(int32 SoulsAmount) const;
+	void SetHealthBarPercent(float Percent);
+	void SetStaminaBarPercent(float Percent);
+	void SetGold(int32 GoldAmount);
+	void SetSouls(int32 SoulsAmount);
 	
 private:
 	UPROPERTY(meta = (BindWidget))

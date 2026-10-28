@@ -4,7 +4,7 @@
 #include "GameFramework/HUD.h"
 #include "PlayerHUD.generated.h"
 
-class UViewportOverlay;
+class UPlayerViewportWidget;
 
 UCLASS()
 class ACTIONRPGCOURSE_API APlayerHUD : public AHUD {
@@ -15,8 +15,8 @@ protected:
 	
 private:
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UViewportOverlay> ViewportOverlayClass;
+	TSubclassOf<UPlayerViewportWidget> PlayerViewportWidgetClass;
 	
 	UPROPERTY()
-	TObjectPtr<UViewportOverlay> ViewportOverlay;
+	TObjectPtr<UPlayerViewportWidget> PlayerViewportWidget;
 };

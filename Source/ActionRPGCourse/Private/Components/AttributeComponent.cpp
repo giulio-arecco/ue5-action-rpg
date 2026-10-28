@@ -16,5 +16,6 @@ void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UAttributeComponent::ReceiveDamage(float DamageAmount) {
 	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
+	OnHealthChanged.Broadcast(GetHealthPercent());
 }
 

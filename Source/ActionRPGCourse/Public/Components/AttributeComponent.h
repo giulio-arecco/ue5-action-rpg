@@ -4,11 +4,15 @@
 #include "Components/ActorComponent.h"
 #include "AttributeComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FHealthChanged, float /* New Health Percent */);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONRPGCOURSE_API UAttributeComponent : public UActorComponent {
 	GENERATED_BODY()
 
 public:
+	FHealthChanged OnHealthChanged;
+	
 	UAttributeComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void ReceiveDamage(float DamageAmount);

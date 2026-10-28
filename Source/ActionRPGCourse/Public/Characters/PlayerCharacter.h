@@ -6,6 +6,8 @@
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
 
+class UPlayerViewportWidget;
+class APlayerHUD;
 class AWeapon;
 class AItem;
 class UGroomComponent;
@@ -33,6 +35,7 @@ public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
+	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return AttributeComponent; };
 	
 protected:
 	virtual bool CanAttack() const override;

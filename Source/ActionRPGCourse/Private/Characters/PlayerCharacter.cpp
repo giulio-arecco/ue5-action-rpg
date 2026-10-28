@@ -38,15 +38,18 @@ APlayerCharacter::APlayerCharacter() {
 }
 
 void APlayerCharacter::BeginPlay() {
+	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
+	
 	Super::BeginPlay();
 	
 	Tags.Add(FName("PlayerCharacter"));
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())) {
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
+	const APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
+	
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()); 
+	checkf(Subsystem != nullptr, TEXT("[%s] Local Player Subsystem is null"), *GetName());
+	
+	Subsystem->AddMappingContext(DefaultMappingContext, 0);
 }
 
 void APlayerCharacter::Tick(float DeltaTime) {
@@ -181,6 +184,7 @@ void APlayerCharacter::Attack() {
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
+	// TODO: Additional checks on death state and more (cfr. AEnemy::TakeDamage)
 	ReceiveDamage(DamageAmount);
 	return DamageAmount;
 }
