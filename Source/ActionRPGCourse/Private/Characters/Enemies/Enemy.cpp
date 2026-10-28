@@ -43,6 +43,7 @@ void AEnemy::BeginPlay() {
 	}
 	
 	HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
+	AttributeComponent->OnHealthChanged.AddUObject(HealthBarComponent.Get(), &UHealthBarComponent::SetHealthPercent);
 	HideHealthBar();
 	
 	PawnSensingComponent->OnSeePawn.AddUniqueDynamic(this, &AEnemy::OnSeePawn);
@@ -182,7 +183,6 @@ void AEnemy::ReceiveDamage(float DamageAmount) const {
 	Super::ReceiveDamage(DamageAmount);
 	
 	if (IsAlive()) {
-		HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
 		ShowHealthBar();
 	}
 }

@@ -15,6 +15,7 @@ void UAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 }
 
 void UAttributeComponent::ReceiveDamage(float DamageAmount) {
+	if (!IsAlive()) return;
 	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 	OnHealthChanged.Broadcast(GetHealthPercent());
 }
