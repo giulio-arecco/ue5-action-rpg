@@ -149,6 +149,9 @@ void ABaseCharacter::ReceiveDamage(const float DamageAmount) const {
 	AttributeComponent->ReceiveDamage(DamageAmount);
 }
 
+float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
 void ABaseCharacter::HitReactMontageEnd() {}
 bool ABaseCharacter::CanAttack() const { return false; }
 void ABaseCharacter::Attack() {}

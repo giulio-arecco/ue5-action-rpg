@@ -178,6 +178,13 @@ void APlayerCharacter::Attack() {
 	}
 }
 
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	ReceiveDamage(DamageAmount);
+	return DamageAmount;
+}
+
 void APlayerCharacter::HitReactMontageEnd() {
 	Super::HitReactMontageEnd();
 	ActionState = ECharacterActionState::ECAS_Unoccupied;
