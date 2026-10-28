@@ -79,7 +79,7 @@ void ABaseCharacter::PlayAttackMontage() const {
 
 void ABaseCharacter::PlayHitReactMontage(const FVector& HitterPosition) const {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	checkf(AnimInstance != nullptr, TEXT("[%s] AnimInstance is null"), *GetName());
+	if (!ensureAlwaysMsgf(AnimInstance != nullptr, TEXT("[%s] AnimInstance is null"), *GetName())) return;
 	
 	if (!ensureAlwaysMsgf(HitReactMontage != nullptr, TEXT("[%s] HitReactMontage is null"), *GetName())) return;
 	
@@ -140,12 +140,12 @@ void ABaseCharacter::SpawnHitParticles(const FVector& Location, const FVector& N
 }
 
 bool ABaseCharacter::IsAlive() const {
-	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
+	if (!ensureAlwaysMsgf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName())) return false;
 	return AttributeComponent->IsAlive();
 }
 
 void ABaseCharacter::ReceiveDamage(const float DamageAmount) const {
-	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
+	if (!ensureAlwaysMsgf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName())) return;
 	AttributeComponent->ReceiveDamage(DamageAmount);
 }
 

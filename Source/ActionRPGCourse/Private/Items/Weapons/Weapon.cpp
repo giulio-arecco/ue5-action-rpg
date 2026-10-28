@@ -86,7 +86,7 @@ bool AWeapon::DoBoxTrace(FHitResult& OutHitResult) {
 }
 
 void AWeapon::HitActor(AActor* ActorToHit, const FVector& ImpactPoint, const FVector& ImpactNormal) {
-	checkf(ActorToHit != nullptr, TEXT("[%s] ActorToHit was null in HitActor"), *GetName());
+	if (!ensureAlwaysMsgf(ActorToHit != nullptr, TEXT("[%s] ActorToHit was null in HitActor"), *GetName())) return;
 	
 	// Calls HitActor.TakeDamage
 	UGameplayStatics::ApplyDamage(

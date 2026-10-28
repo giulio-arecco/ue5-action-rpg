@@ -81,7 +81,7 @@ void AEnemy::Tick(float DeltaTime) {
 }
 
 bool AEnemy::IsInTargetRange(const AActor* Target, float Range) const {
-	check(Target);
+	if (!ensureAlwaysMsgf(Target != nullptr, TEXT("[%s] Target is null in IsInTargetRange"), *GetName())) return false;
 	
 	const double DistSq = FVector::DistSquared(GetActorLocation(), Target->GetActorLocation());
 	return DistSq < FMath::Square(Range);
@@ -90,8 +90,8 @@ bool AEnemy::IsInTargetRange(const AActor* Target, float Range) const {
 void AEnemy::TransitionToState(EEnemyState NewState) {
 	if (EnemyState == NewState) return;
 	
-	checkf(GetCharacterMovement() != nullptr, TEXT("[%s] CharacterMovement is null"), *GetName());
-	checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
+	if (!ensureAlwaysMsgf(GetCharacterMovement() != nullptr, TEXT("[%s] CharacterMovement is null"), *GetName())) return;
+	if (!ensureAlwaysMsgf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName())) return;
 	
 	switch (NewState) {
 	case EEnemyState::EES_Patrolling:
@@ -142,7 +142,7 @@ void AEnemy::GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPo
 	Super::GetHit_Implementation(Hitter, ImpactPoint, ImpactNormal);
 	
 	if (EnemyState != EEnemyState::EES_Dead && IsAlive()) {
-		checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
+		if (!ensureAlwaysMsgf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName())) return;
 		
 		ActionState = EEnemyActionState::EEAS_StateLocked;
 		if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
@@ -177,8 +177,8 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 }
 
 void AEnemy::ReceiveDamage(float DamageAmount) const {
-	checkf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName());
-	checkf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName());
+	if (!ensureAlwaysMsgf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName())) return;
+	if (!ensureAlwaysMsgf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName())) return;
 	
 	Super::ReceiveDamage(DamageAmount);
 	
@@ -256,14 +256,15 @@ void AEnemy::FreezeDeathAnimationAndSetDestroyTimer() {
 }
 
 void AEnemy::InitPatrolling() {
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed; 
 	
-	AIController = CastChecked<AAIController>(GetController());
+	AIController = Cast<AAIController>(GetController());
+	if (!ensureAlwaysMsgf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName())) return;
 	
 	if (PatrolTargets.Num() <= 0) return;
 	
 	UPathFollowingComponent* PathFollowingComp = AIController->GetPathFollowingComponent();
-	checkf(PathFollowingComp != nullptr, TEXT("[%s] PathFollowingComponent is null"), *GetName());
+	if (!ensureAlwaysMsgf(PathFollowingComp != nullptr, TEXT("[%s] PathFollowingComponent is null"), *GetName())) return;
 
 	PathFollowingComp->OnRequestFinished.AddWeakLambda(this, [this] (FAIRequestID RequestID, const FPathFollowingResult& Result) {
 		// Only set the timer if the movement was finished and the enemy is patrolling
@@ -298,7 +299,7 @@ void AEnemy::StartPatrolling() {
 
 AActor* AEnemy::PickRandomPatrolTarget() const {
 	const int32 NumPatrolTargets = PatrolTargets.Num();
-	checkf(NumPatrolTargets > 0, TEXT("[%s] PatrolTargets is empty"), *GetName());
+	if (!ensureAlwaysMsgf(NumPatrolTargets > 0, TEXT("[%s] PatrolTargets is empty"), *GetName())) return nullptr;
 	
 	AActor* CurrentMoveTarget = MoveTarget.Get();
 	
@@ -323,13 +324,12 @@ AActor* AEnemy::PickRandomPatrolTarget() const {
 	const int32 RandomOffset = FMath::RandRange(1, NumPatrolTargets - 1);
 	const int32 NextIndex = (CurrentIndex + RandomOffset) % NumPatrolTargets;
 	
-	checkf(PatrolTargets[NextIndex] != nullptr, TEXT("[%s] The picked target from PatrolTargets is null"), *GetName());
-	
+	if (!ensureAlwaysMsgf(PatrolTargets[NextIndex] != nullptr, TEXT("[%s] The picked target from PatrolTargets is null"), *GetName())) return nullptr;
 	return PatrolTargets[NextIndex];
 }
 
 void AEnemy::MoveToTarget(AActor* Target, float AcceptanceRadius) {
-	checkf(Target != nullptr, TEXT("[%s] Target is null in MoveToTarget"), *GetName());
+	if (!ensureAlwaysMsgf(Target != nullptr, TEXT("[%s] Target is null in MoveToTarget"), *GetName())) return;
 	
 	MoveTarget = Target;
 	
@@ -355,7 +355,7 @@ bool AEnemy::CanAttack() const {
 
 void AEnemy::Attack() {
 	if (!ensureAlwaysMsgf(EnemyState == EEnemyState::EES_InCombat, TEXT("[%s] Tried attacking while not in the InCombat state"), *GetName())) return;
-	checkf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName());
+	if (!ensureAlwaysMsgf(AIController != nullptr, TEXT("[%s] AIController is null"), *GetName())) return;
 
 	Super::Attack();
 	
@@ -377,7 +377,7 @@ void AEnemy::AttackTimerEnd() {
 }
 
 FVector AEnemy::ComputeMotionWarpingTarget() const {
-	checkf(CombatTarget != nullptr, TEXT("[%s] ComputeMotionWarpingTarget called when CombatTarget is null"), *GetName());
+	if (!ensureAlwaysMsgf(CombatTarget != nullptr, TEXT("[%s] ComputeMotionWarpingTarget called when CombatTarget is null"), *GetName())) return GetActorLocation();
 	
 	const FVector TargetLocation = CombatTarget->GetActorLocation();
 	const FVector Location = GetActorLocation();
@@ -387,15 +387,15 @@ FVector AEnemy::ComputeMotionWarpingTarget() const {
 }
 
 void AEnemy::ShowHealthBar() const {
-	checkf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName());
-	
+	if (!ensureAlwaysMsgf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName())) return;
+
 	if (!HealthBarComponent->IsVisible()) {
 		HealthBarComponent->SetVisibility(true);
 	}
 }
 
 void AEnemy::HideHealthBar() const {
-	checkf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName());
+	if (!ensureAlwaysMsgf(HealthBarComponent != nullptr, TEXT("[%s] HealthBarComponent is null"), *GetName())) return;
 	
 	if (HealthBarComponent->IsVisible()) {
 		HealthBarComponent->SetVisibility(false);
