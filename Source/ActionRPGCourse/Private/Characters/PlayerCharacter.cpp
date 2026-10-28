@@ -64,9 +64,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookTriggered);
 	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::InteractStarted);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::AttackStarted);
-	// We use the ACharacter::Jump function to handle jumping, since currently there's no need for a APlayerCharacter::JumpTriggered function 
-	// TODO: disallow jumping when playing other animations / performing other actions
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 }
 
@@ -78,6 +76,11 @@ void APlayerCharacter::GetHit_Implementation(const AActor* Hitter, const FVector
 		ActionState = ECharacterActionState::ECAS_ReactingToHit;
 		PlayHitReactMontage(Hitter->GetActorLocation());
 	}
+}
+
+void APlayerCharacter::HitReactMontageEnd() {
+	Super::HitReactMontageEnd();
+	ActionState = ECharacterActionState::ECAS_Unoccupied;
 }
 
 void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
@@ -102,6 +105,11 @@ void APlayerCharacter::MoveTriggered(const FInputActionValue& Value) {
 	}
 }
 
+void APlayerCharacter::Jump() {
+	if (ActionState != ECharacterActionState::ECAS_Unoccupied) return;
+	Super::Jump();
+}
+
 void APlayerCharacter::LookTriggered(const FInputActionValue& Value) {
 	const FVector2D LookVector = Value.Get<FVector2D>();
 
@@ -112,7 +120,7 @@ void APlayerCharacter::LookTriggered(const FInputActionValue& Value) {
 }
 
 void APlayerCharacter::InteractStarted() {
-	if (ActionState != ECharacterActionState::ECAS_Unoccupied) return;
+	if (ActionState != ECharacterActionState::ECAS_Unoccupied || GetCharacterMovement()->IsFalling()) return;
 	
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	if (OverlappingWeapon != nullptr) {
@@ -142,24 +150,26 @@ void APlayerCharacter::PlayEquipMontage(FName SectionName) const {
 bool APlayerCharacter::CanArm() const {
 	return ActionState == ECharacterActionState::ECAS_Unoccupied &&
 		CharacterState == ECharacterState::ECS_Disarmed &&
+		!GetCharacterMovement()->IsFalling() &&
 		EquippedWeapon != nullptr;
 }
 
 bool APlayerCharacter::CanDisarm() const {
 	return ActionState == ECharacterActionState::ECAS_Unoccupied &&
 		CharacterState == ECharacterState::ECS_Armed &&
+		!GetCharacterMovement()->IsFalling() &&
 		EquippedWeapon != nullptr;
 }
 
 void APlayerCharacter::Arm() {
+	// The CharacterState is set on the AnimNotify at the end of the Arm montage section
 	ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
-	CharacterState = ECharacterState::ECS_Armed;
 	PlayEquipMontage(FName("Equip"));
 }
 
 void APlayerCharacter::Disarm() {
+	// The CharacterState is set on the AnimNotify at the end of the Disarm montage section
 	ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
-	CharacterState = ECharacterState::ECS_Disarmed;
 	PlayEquipMontage(FName("Unequip"));
 }
 
@@ -169,7 +179,8 @@ void APlayerCharacter::AttackStarted() {
 
 bool APlayerCharacter::CanAttack() const {
 	return CharacterState == ECharacterState::ECS_Armed &&
-		ActionState == ECharacterActionState::ECAS_Unoccupied;
+		ActionState == ECharacterActionState::ECAS_Unoccupied &&
+		!GetCharacterMovement()->IsFalling();
 }
 
 void APlayerCharacter::Attack() {
@@ -187,11 +198,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	// TODO: Additional checks on death state and more (cfr. AEnemy::TakeDamage)
 	ReceiveDamage(DamageAmount);
 	return DamageAmount;
-}
-
-void APlayerCharacter::HitReactMontageEnd() {
-	Super::HitReactMontageEnd();
-	ActionState = ECharacterActionState::ECAS_Unoccupied;
 }
 
 void APlayerCharacter::AttachWeaponToHand() const {
