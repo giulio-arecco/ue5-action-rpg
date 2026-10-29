@@ -32,6 +32,9 @@ protected:
 	 *    Animation Related Variables   *
 	 ************************************/
 	
+	UPROPERTY(EditAnywhere)
+	float LifeSpanAfterDeath = 10.0f;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation|Montages")
 	TObjectPtr<UAnimMontage> AttackMontage;
 	
@@ -60,6 +63,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const;
 	
+	UFUNCTION(BlueprintCallable)
+	void PauseAnimationsAndSetDestroyTimer();
+	
+	void PauseAnimations() const;
 	double ComputeAngleTo(const FVector& InPoint) const;
 	void PlayHitSound(const FVector& Location) const;
 	void SpawnHitParticles(const FVector& Location, const FVector& Normal) const;
@@ -74,4 +81,10 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UParticleSystem> HitParticles;
+	
+	/******************
+	 *    Functions   *
+	 ******************/
+	
+	void PlayRandomMontageSection(UAnimMontage* Montage) const;
 };

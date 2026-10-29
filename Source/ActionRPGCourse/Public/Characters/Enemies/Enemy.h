@@ -27,7 +27,6 @@ public:
 	FVector ComputeMotionWarpingTarget() const;
 	
 protected:
-	virtual void PlayDeathMontage() const override;
 	virtual void ReceiveDamage(float DamageAmount) const override;
 	virtual void Die() override;
 	virtual bool CanAttack() const override;
@@ -40,9 +39,6 @@ private:
 	
 	UPROPERTY(VisibleInstanceOnly)
 	EEnemyActionState ActionState = EEnemyActionState::EEAS_Unoccupied;
-	
-	UPROPERTY(EditAnywhere)
-	float LifeSpanAfterDeath = 10.0f;
 	
 	UPROPERTY(EditAnywhere)
 	double WarpTargetOffset = 50.0f;
@@ -109,13 +105,6 @@ private:
 	float AttackTimerMin = 0.75f;
 	float AttackTimerMax = 1.2f;
 	FTimerHandle AttackTimerHandle;
-	
-	/************************************
-	 *    Animation Related Functions   *
-	 ************************************/ 
-	
-	UFUNCTION(BlueprintCallable)
-	void FreezeDeathAnimationAndSetDestroyTimer();
 	
 	/*****************************
 	 *    AI Related Functions   *

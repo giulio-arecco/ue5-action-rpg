@@ -2,6 +2,7 @@
 
 #include "Components/AttributeComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Weapons/Weapon.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -65,16 +66,7 @@ void ABaseCharacter::GetHit_Implementation(const AActor* Hitter, const FVector& 
 }
 
 void ABaseCharacter::PlayAttackMontage() const {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && AttackMontage != nullptr) {
-		AnimInstance->Montage_Play(AttackMontage);
-
-		if (const int32 NumSections = AttackMontage->GetNumSections(); NumSections > 0) {
-			const int32 RandomIndex = FMath::RandRange(0, NumSections - 1);
-			const FName SectionName = AttackMontage->GetSectionName(RandomIndex);
-			AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
-		}
-	}
+	PlayRandomMontageSection(AttackMontage);
 }
 
 void ABaseCharacter::PlayHitReactMontage(const FVector& HitterPosition) const {
@@ -129,6 +121,23 @@ double ABaseCharacter::ComputeAngleTo(const FVector& InPoint) const {
 	return FMath::RadiansToDegrees(FMath::Atan2(SinTheta, CosTheta));
 }
 
+void ABaseCharacter::PauseAnimations() const {
+	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
+		Skm->bPauseAnims = true;
+		Skm->SetComponentTickEnabled(false);
+	}
+}
+
+void ABaseCharacter::PauseAnimationsAndSetDestroyTimer() {
+	PauseAnimations();
+	
+	DetachFromControllerPendingDestroy();
+	// We use this approach instead of SetLifeSpan() because this way the timer does not get updated in the Actor's tick, 
+	// meaning it can be disabled. We use K2_DestroyActor instead of Destroy to match the delegate signature.
+	FTimerHandle DeathTimerHandle;
+	GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &AActor::K2_DestroyActor, LifeSpanAfterDeath, false);
+}
+
 void ABaseCharacter::PlayHitSound(const FVector& Location) const {
 	if (!ensureAlwaysMsgf(HitSound != nullptr, TEXT("[%s] HitSound is null"), *GetName())) return;
 	UGameplayStatics::PlaySoundAtLocation(this, HitSound, Location);
@@ -152,8 +161,49 @@ void ABaseCharacter::ReceiveDamage(const float DamageAmount) const {
 float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
+
+void ABaseCharacter::Die() {
+	if (UCharacterMovementComponent* CharMove = GetCharacterMovement(); CharMove != nullptr) {
+		CharMove->DisableMovement();
+		CharMove->StopMovementImmediately();
+	}
+	
+	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent(); CapsuleComp != nullptr) {
+		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
+		Skm->SetGenerateOverlapEvents(false);
+		Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	if (EquippedWeapon != nullptr) {
+		SetEquippedWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	PlayDeathMontage();
+	SetActorTickEnabled(false);
+}
+
+void ABaseCharacter::PlayDeathMontage() const {
+	PlayRandomMontageSection(DeathMontage);
+}
+
 void ABaseCharacter::HitReactMontageEnd() {}
 bool ABaseCharacter::CanAttack() const { return false; }
 void ABaseCharacter::Attack() {}
-void ABaseCharacter::Die() {}
-void ABaseCharacter::PlayDeathMontage() const {}
+
+void ABaseCharacter::PlayRandomMontageSection(UAnimMontage* Montage) const {
+	if (!ensureAlwaysMsgf(Montage != nullptr, TEXT("[%s] Montage is null in PlayRandomMontageSection"), *GetName())) return;
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr && Montage != nullptr) {
+		AnimInstance->Montage_Play(Montage);
+
+		if (const int32 NumSections = Montage->GetNumSections(); NumSections > 0) {
+			const int32 RandomIndex = FMath::RandRange(0, NumSections - 1);
+			const FName SectionName = Montage->GetSectionName(RandomIndex);
+			AnimInstance->Montage_JumpToSection(SectionName, Montage);
+		}
+	}
+}

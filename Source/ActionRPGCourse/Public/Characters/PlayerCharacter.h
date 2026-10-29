@@ -39,6 +39,7 @@ public:
 	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return AttributeComponent; };
 	
 protected:
+	virtual void Die() override;
 	virtual bool CanAttack() const override;
 	virtual void Attack() override;
 	virtual void HitReactMontageEnd() override;
@@ -117,7 +118,7 @@ private:
 	 *  Animation-related Functions  *
 	 ********************************/
 	
-	void PlayEquipMontage(FName SectionName) const;
+	void PlayArmMontage(FName SectionName) const;
 	void Arm();
 	void Disarm();
 	

@@ -193,66 +193,14 @@ void AEnemy::Die() {
 	UE_LOG(LogTemp, Warning, TEXT("Dead"));
 		
 	EnemyState = EEnemyState::EES_Dead;
-		
-	DetachFromControllerPendingDestroy();
-	
-	if (UCharacterMovementComponent* CharMove = GetCharacterMovement(); CharMove != nullptr) {
-		CharMove->DisableMovement();
-		CharMove->StopMovementImmediately();
-	}
 	
 	if (PawnSensingComponent != nullptr) {
 		PawnSensingComponent->SetSensingUpdatesEnabled(false);
 	}
 	
-	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent(); CapsuleComp != nullptr) {
-		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
-	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
-		Skm->SetGenerateOverlapEvents(false);
-		Skm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
-	if (EquippedWeapon != nullptr) {
-		SetEquippedWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
 	HideHealthBar();
 	if (PatrolTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
 	if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
-	
-	PlayDeathMontage();
-	
-	SetActorTickEnabled(false);
-}
-
-void AEnemy::PlayDeathMontage() const {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && DeathMontage != nullptr) {
-		AnimInstance->Montage_Play(DeathMontage);
-
-		if (const int32 NumSections = DeathMontage->GetNumSections(); NumSections > 0) {
-			const int32 RandomIndex = FMath::RandRange(0, NumSections - 1);
-			const FName SectionName = DeathMontage->GetSectionName(RandomIndex);
-			AnimInstance->Montage_JumpToSection(SectionName, DeathMontage);
-		}
-		
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		HideHealthBar();
-	}
-}
-
-void AEnemy::FreezeDeathAnimationAndSetDestroyTimer() {
-	if (USkeletalMeshComponent* Skm = GetMesh(); Skm != nullptr) {
-		Skm->bPauseAnims = true;
-		Skm->SetComponentTickEnabled(false);
-	}
-	
-	// We use this approach instead of SetLifeSpan() because this way the timer does not get updated in the Actor's tick, 
-	// meaning it can be disabled. We use K2_DestroyActor instead of Destroy to match the delegate signature.
-	FTimerHandle DeathTimerHandle;
-	GetWorldTimerManager().SetTimer(DeathTimerHandle, this, &AActor::K2_DestroyActor, LifeSpanAfterDeath, false);
 }
 
 void AEnemy::InitPatrolling() {
@@ -350,7 +298,11 @@ void AEnemy::OnSeePawn(APawn* SeenPawn) {
 
 bool AEnemy::CanAttack() const {
 	const AActor* Target = CombatTarget.Get(); 
-	return Target != nullptr && IsInTargetRange(Target, CombatRadius);
+	
+	return EnemyState == EEnemyState::EES_InCombat &&
+		Target != nullptr && 
+		IsAlive()  &&
+		IsInTargetRange(Target, CombatRadius);
 }
 
 void AEnemy::Attack() {

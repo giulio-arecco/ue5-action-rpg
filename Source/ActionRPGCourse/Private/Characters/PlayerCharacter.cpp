@@ -71,8 +71,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) {
 	Super::GetHit_Implementation(Hitter, ImpactPoint, ImpactNormal);
 	
-	// TODO: Remember to check if in Death state once it will be implemented
-	if (IsAlive()) {
+	if (ActionState != ECharacterActionState::ECAS_Dead && IsAlive()) {
 		ActionState = ECharacterActionState::ECAS_ReactingToHit;
 		PlayHitReactMontage(Hitter->GetActorLocation());
 	}
@@ -139,14 +138,6 @@ void APlayerCharacter::EquipWeapon(AWeapon* OverlappingWeapon) {
 	OverlappingItem = nullptr;
 }
 
-void APlayerCharacter::PlayEquipMontage(FName SectionName) const {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && EquipMontage != nullptr) {
-		AnimInstance->Montage_Play(EquipMontage);
-		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
-	}
-}
-
 bool APlayerCharacter::CanArm() const {
 	return ActionState == ECharacterActionState::ECAS_Unoccupied &&
 		CharacterState == ECharacterState::ECS_Disarmed &&
@@ -164,13 +155,21 @@ bool APlayerCharacter::CanDisarm() const {
 void APlayerCharacter::Arm() {
 	// The CharacterState is set on the AnimNotify at the end of the Arm montage section
 	ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
-	PlayEquipMontage(FName("Equip"));
+	PlayArmMontage(FName("Equip"));
 }
 
 void APlayerCharacter::Disarm() {
 	// The CharacterState is set on the AnimNotify at the end of the Disarm montage section
 	ActionState = ECharacterActionState::ECAS_ArmingOrDisarming;
-	PlayEquipMontage(FName("Unequip"));
+	PlayArmMontage(FName("Unequip"));
+}
+
+void APlayerCharacter::PlayArmMontage(FName SectionName) const {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr && EquipMontage != nullptr) {
+		AnimInstance->Montage_Play(EquipMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
+	}
 }
 
 void APlayerCharacter::AttackStarted() {
@@ -193,11 +192,21 @@ void APlayerCharacter::Attack() {
 }
 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
+	if (ActionState == ECharacterActionState::ECAS_Dead) return 0.0f;
+	
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
-	// TODO: Additional checks on death state and more (cfr. AEnemy::TakeDamage)
 	ReceiveDamage(DamageAmount);
+	if (!IsAlive()) Die();
+	
 	return DamageAmount;
+}
+
+void APlayerCharacter::Die() {
+	Super::Die();
+	
+	UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter is Dead"));
+	ActionState = ECharacterActionState::ECAS_Dead;
 }
 
 void APlayerCharacter::AttachWeaponToHand() const {

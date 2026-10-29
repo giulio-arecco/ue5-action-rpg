@@ -66,6 +66,8 @@ void AWeapon::SetWeaponBoxCollisionEnabled(ECollisionEnabled::Type CollisionEnab
 bool AWeapon::DoBoxTrace(FHitResult& OutHitResult) {
 	const FVector Start = BoxTraceStart->GetComponentLocation();
 	const FVector End = BoxTraceEnd->GetComponentLocation();
+	
+	ActorsToIgnore.AddUnique(GetOwner());
 
 	const bool HitSomething = UKismetSystemLibrary::BoxTraceSingle(
 		this,
