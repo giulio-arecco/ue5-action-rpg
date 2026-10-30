@@ -89,7 +89,8 @@ Content/AnimalVarietyPack/
 Content/AncientContent/
 Content/Atris_swords/
 Content/Mixamo/
-Content/Effects/
+Content/Effects/*
+!Content/Effects/Niagara/
 Content/ParagonMinions/
 Content/Ancient_Terracotta_Vase/
 Content/AncientTreasures/
