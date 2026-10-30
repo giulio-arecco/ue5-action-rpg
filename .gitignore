@@ -82,28 +82,25 @@ DerivedDataCache/*
 
 # Third party asset packs
 Assets/
+Content/_Game/ThirdParty/
 Content/StarterContent/
 Content/EuropeanBeech/
 Content/StylizedNaturePack/
-Content/AnimalVarietyPack/
-Content/AncientContent/
-Content/Atris_swords/
 Content/Mixamo/
-Content/Effects/*
-!Content/Effects/Niagara/
 Content/ParagonMinions/
 Content/Ancient_Terracotta_Vase/
-Content/AncientTreasures/
-Content/Textures/
 Content/Weapon_Pack/
 
 # Quixel Megascans and Fab
 Content/Fab/
 Content/MSPresets/
 
-# Level and Landscape data
-Content/Landscape/
-Content/Maps/
+# Ignored assets
+Content/_Game/Landscape/
+Content/_Game/Maps/
+Content/_Game/Textures/
+Content/_Game/Effects/*
+!Content/_Game/Effects/Niagara/
 
 # World Partition generated data
 Content/__ExternalActors__/
