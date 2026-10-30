@@ -132,6 +132,7 @@ private:
 	void ShowHealthBar() const;
 	void HideHealthBar() const;
 	
+	bool IsTargetValid(const AActor* Target) const;
 	/* Target must not be null */
 	bool IsInTargetRange(const AActor* Target, float Range) const;
 };

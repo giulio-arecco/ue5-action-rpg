@@ -59,17 +59,17 @@ void AEnemy::Tick(float DeltaTime) {
 	if (ActionState != EEnemyActionState::EEAS_StateLocked) {
 		switch (EnemyState) {
 		case EEnemyState::EES_Patrolling:
-			if (Target == nullptr) break;
+			if (!IsTargetValid(Target)) break;
 			if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_InCombat);
 			else if (IsInTargetRange(Target, ChaseRadius)) TransitionToState(EEnemyState::EES_Chasing);
 			break;
 		case EEnemyState::EES_Chasing:
-			if (Target == nullptr) TransitionToState(EEnemyState::EES_Patrolling);
+			if (!IsTargetValid(Target)) TransitionToState(EEnemyState::EES_Patrolling);
 			else if (IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_InCombat);
 			else if (!IsInTargetRange(Target, ChaseRadius)) TransitionToState(EEnemyState::EES_Patrolling);
 			break;
 		case EEnemyState::EES_InCombat:
-			if (Target == nullptr) TransitionToState(EEnemyState::EES_Patrolling);
+			if (!IsTargetValid(Target)) TransitionToState(EEnemyState::EES_Patrolling);
 			else if (!IsInTargetRange(Target, ChaseRadius)) TransitionToState(EEnemyState::EES_Patrolling);
 			else if (!IsInTargetRange(Target, CombatRadius)) TransitionToState(EEnemyState::EES_Chasing);
 			break;
@@ -85,6 +85,18 @@ bool AEnemy::IsInTargetRange(const AActor* Target, float Range) const {
 	
 	const double DistSq = FVector::DistSquared(GetActorLocation(), Target->GetActorLocation());
 	return DistSq < FMath::Square(Range);
+}
+
+bool AEnemy::IsTargetValid(const AActor* Target) const {
+	if (!IsValid(Target)) return false;
+	
+	/* TODO: Implement a ITargetableInterface to avoid searching for an AttributeComponent and to extend targetability checks on Actors 
+	that don't have an AttributesComponent. The interface should provide a IsTargetable() method to check targetability. */
+	if (const UAttributeComponent* TargetAttributes = Target->FindComponentByClass<UAttributeComponent>(); TargetAttributes != nullptr) {
+		return TargetAttributes->IsAlive();
+	}
+	
+	return true;
 }
 
 void AEnemy::TransitionToState(EEnemyState NewState) {
@@ -289,7 +301,7 @@ void AEnemy::MoveToTarget(AActor* Target, float AcceptanceRadius) {
 }
 
 void AEnemy::OnSeePawn(APawn* SeenPawn) {
-	if (!SeenPawn->ActorHasTag(FName("PlayerCharacter")) || EnemyState != EEnemyState::EES_Patrolling) return;
+	if (!IsTargetValid(SeenPawn) || !SeenPawn->ActorHasTag(FName("PlayerCharacter")) || EnemyState != EEnemyState::EES_Patrolling) return;
 	
 	UE_LOG(LogTemp, Warning, TEXT("Seen Character"));
 	
@@ -300,8 +312,8 @@ bool AEnemy::CanAttack() const {
 	const AActor* Target = CombatTarget.Get(); 
 	
 	return EnemyState == EEnemyState::EES_InCombat &&
-		Target != nullptr && 
 		IsAlive()  &&
+		IsTargetValid(Target) && 
 		IsInTargetRange(Target, CombatRadius);
 }
 
