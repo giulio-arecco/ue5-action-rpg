@@ -16,12 +16,15 @@ class ACTIONRPGCOURSE_API UPlayerAnimInstance : public UAnimInstance {
 public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<APlayerCharacter> PlayerCharacter;
+	
+	UPROPERTY(BlueprintReadOnly)
+	ECharacterState CharacterState;
+	
+	UPROPERTY(BlueprintReadOnly)
+	ECharacterActionState ActionState;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
 	TObjectPtr<UCharacterMovementComponent> PlayerCharacterMovement;
-
-	UPROPERTY(BlueprintReadOnly)
-	ECharacterState CharacterState;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement")
 	float GroundSpeed;

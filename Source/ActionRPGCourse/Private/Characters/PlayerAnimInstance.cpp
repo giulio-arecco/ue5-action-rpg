@@ -22,5 +22,6 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds) {
 		IsFalling = PlayerCharacterMovement->IsFalling();
 
 		CharacterState = PlayerCharacter->GetCharacterState();
+		ActionState = PlayerCharacter->GetActionState();
 	}
 }

@@ -30,12 +30,10 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void Jump() override;
 	
-	UFUNCTION(BlueprintCallable)
+	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
 	FORCEINLINE void SetActionState(ECharacterActionState State) { ActionState = State; }
-	
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
-	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
 	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return AttributeComponent; };
 	
 protected:
