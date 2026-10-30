@@ -48,7 +48,7 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket, AActor* Ne
 		UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
 	}
 
-	DeactivatePickupVFX();
+	DeactivateItemParticles();
 }
 
 void AWeapon::AttachWeaponToSocket(USceneComponent* InParent, const FName& InSocket) const {

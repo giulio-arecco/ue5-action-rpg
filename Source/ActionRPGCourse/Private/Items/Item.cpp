@@ -19,8 +19,8 @@ AItem::AItem() {
 	Sphere->SetupAttachment(GetRootComponent());
 	Sphere->SetSphereRadius(150.0f);
 	
-	PickupParticles = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ItemNiagaraPickup"));
-	PickupParticles->SetupAttachment(GetRootComponent());
+	ItemParticles = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ItemNiagaraPickup"));
+	ItemParticles->SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay() {
@@ -42,9 +42,9 @@ void AItem::Tick(float DeltaTime) {
 	}
 }
 
-void AItem::DeactivatePickupVFX() const {
-	if (PickupParticles != nullptr) {
-		PickupParticles->Deactivate();
+void AItem::DeactivateItemParticles() const {
+	if (ItemParticles != nullptr) {
+		ItemParticles->Deactivate();
 	}
 }
 

@@ -43,7 +43,7 @@ protected:
 	EItemState ItemState = EItemState::EIS_Hovering;
 	
 	virtual void BeginPlay() override;
-	void DeactivatePickupVFX() const;
+	void DeactivateItemParticles() const;
 
 	UFUNCTION(BlueprintPure)
 	float TransformedSin() const;
@@ -65,7 +65,7 @@ private:
 	TObjectPtr<USphereComponent> Sphere;
 	
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UNiagaraComponent> PickupParticles;
+	TObjectPtr<UNiagaraComponent> ItemParticles;
 
 	template<typename T>
 	T Avg(T First, T Second) {
