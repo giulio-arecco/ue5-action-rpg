@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class UNiagaraSystem;
 class UNiagaraComponent;
 class USphereComponent;
 
@@ -42,6 +43,12 @@ protected:
 	UPROPERTY(VisibleInstanceOnly)
 	EItemState ItemState = EItemState::EIS_Hovering;
 	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UNiagaraSystem> PickupEffect;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USoundBase> PickupSound;
+	
 	virtual void BeginPlay() override;
 	void DeactivateItemParticles() const;
 
@@ -57,6 +64,9 @@ protected:
 	UFUNCTION()
 	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
+	void SpawnPickupEffect() const;
+	void PlayPickupSound() const;
+	
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	double RunningTime = 0.0f;
@@ -66,7 +76,7 @@ private:
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UNiagaraComponent> ItemParticles;
-
+	
 	template<typename T>
 	T Avg(T First, T Second) {
 		return (First + Second) / 2;

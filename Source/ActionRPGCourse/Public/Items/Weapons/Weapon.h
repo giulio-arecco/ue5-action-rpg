@@ -32,9 +32,6 @@ protected:
 	void CreateWeaponFields(const FVector& FieldLocation);
 	
 private:
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<USoundBase> EquipSound;
-	
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Box Trace")
 	TObjectPtr<UBoxComponent> WeaponBox;
 	

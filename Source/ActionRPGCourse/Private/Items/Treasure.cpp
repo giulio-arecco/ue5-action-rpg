@@ -17,9 +17,10 @@ void ATreasure::BeginPlay() {
 void ATreasure::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (PlayerCharacter != nullptr) {
-		if (PickupSound != nullptr) {
-			UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
+		if (ensureAlwaysMsgf(PickupSound != nullptr, TEXT("[%s] PickupSound is null in ATreasure::OnSphereBeginOverlap"), *GetName())) {
+			PlayPickupSound();
 		}
+		
 		Destroy();
 	}
 }

@@ -4,6 +4,7 @@
 #include "BaseCharacter.h"
 #include "CharacterTypes.h"
 #include "InputActionValue.h"
+#include "Interfaces/PickupInterface.h"
 #include "PlayerCharacter.generated.h"
 
 class UPlayerViewportWidget;
@@ -18,7 +19,7 @@ class UInputMappingContext;
 class UAnimMontage;
 
 UCLASS()
-class ACTIONRPGCOURSE_API APlayerCharacter : public ABaseCharacter {
+class ACTIONRPGCOURSE_API APlayerCharacter : public ABaseCharacter, public IPickupInterface {
 	GENERATED_BODY()
 
 public:
@@ -30,9 +31,9 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void Jump() override;
 	
+	FORCEINLINE virtual void SetOverlappingItem(AItem* Item) override { OverlappingItem = Item; }
 	FORCEINLINE ECharacterActionState GetActionState() const { return ActionState; }
 	FORCEINLINE void SetActionState(ECharacterActionState State) { ActionState = State; }
-	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 	FORCEINLINE UAttributeComponent* GetAttributeComponent() const { return AttributeComponent; };
 	

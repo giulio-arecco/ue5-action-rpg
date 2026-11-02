@@ -44,8 +44,8 @@ void AWeapon::Equip(USceneComponent* InParent, const FName& InSocket, AActor* Ne
 	 * TODO: Move the equip sound playing elsewhere so that it only plays when a Character picks up a Weapon.
 	 * Right now it can be played even if Equip is called in BeginPlay to start with the Weapon already in hand.
 	*/
-	if (EquipSound != nullptr) {
-		UGameplayStatics::PlaySoundAtLocation(this, EquipSound, GetActorLocation());
+	if (ensureAlwaysMsgf(PickupSound != nullptr, TEXT("[%s] PickupSound is null in AWeapon::Equip"), *GetName())) {
+		PlayPickupSound();
 	}
 
 	DeactivateItemParticles();
