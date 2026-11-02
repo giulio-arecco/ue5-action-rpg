@@ -1,7 +1,7 @@
 ﻿#include "Items/Treasure.h"
 
 #include "Characters/PlayerCharacter.h"
-#include "Kismet/GameplayStatics.h"
+#include "Components/AttributeComponent.h"
 
 
 ATreasure::ATreasure() {
@@ -15,14 +15,21 @@ void ATreasure::BeginPlay() {
 }
 
 void ATreasure::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
-	if (PlayerCharacter != nullptr) {
-		if (ensureAlwaysMsgf(PickupSound != nullptr, TEXT("[%s] PickupSound is null in ATreasure::OnSphereBeginOverlap"), *GetName())) {
-			PlayPickupSound();
-		}
-		
-		Destroy();
+	const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (PlayerCharacter == nullptr) return;
+	
+	UAttributeComponent* PlayerAttributes = PlayerCharacter->GetAttributeComponent();
+	if (!ensureAlwaysMsgf(PlayerAttributes != nullptr, TEXT("[%s] PlayerAttributes is null in ATreasure::OnSphereBeginOverlap"), *GetName())) return;
+	
+	if (ensureAlwaysMsgf(GoldAmount != 0, TEXT("[%s] GoldAmount is 0 in ATreasure::OnSphereBeginOverlap"), *GetName())) {
+		PlayerAttributes->AddGold(GoldAmount);
 	}
+	
+	if (ensureAlwaysMsgf(PickupSound != nullptr, TEXT("[%s] PickupSound is null in ATreasure::OnSphereBeginOverlap"), *GetName())) {
+		PlayPickupSound();
+	}
+	
+	Destroy();
 }
 
 void ATreasure::Tick(float DeltaTime) {

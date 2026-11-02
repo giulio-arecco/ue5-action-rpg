@@ -2,8 +2,8 @@
 
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Characters/PlayerCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Interfaces/PickupInterface.h"
 #include "Kismet/GameplayStatics.h"
 
 AItem::AItem() {
@@ -12,11 +12,12 @@ AItem::AItem() {
 
 	ItemRoot = CreateDefaultSubobject<USceneComponent>(TEXT("ItemRoot"));
 	SetRootComponent(ItemRoot);
-
+	
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ItemMesh->SetupAttachment(ItemRoot);
 	
+	// TODO: Add a PlayerOnlyQuery collision channel to avoid triggering unnecessary overlap events with other Actors.
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("ItemSphere"));
 	Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Sphere->SetCollisionResponseToAllChannels(ECR_Ignore);

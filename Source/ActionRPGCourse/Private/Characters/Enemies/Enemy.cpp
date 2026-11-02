@@ -3,7 +3,6 @@
 #include "AIController.h"
 #include "Characters/CharacterTypes.h"
 #include "Components/AttributeComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBarComponent.h"
 #include "Items/Weapons/Weapon.h"

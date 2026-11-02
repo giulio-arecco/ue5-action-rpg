@@ -31,4 +31,6 @@ void APlayerHUD::BeginPlay() {
 	
 	// Bind callbacks to attribute change events
 	PlayerAttributes->OnHealthChanged.AddUObject(PlayerViewportWidget.Get(), &UPlayerViewportWidget::SetHealthBarPercent);
+	PlayerAttributes->OnGoldChanged.AddUObject(PlayerViewportWidget.Get(), &UPlayerViewportWidget::SetGold);
+	PlayerAttributes->OnSoulsChanged.AddUObject(PlayerViewportWidget.Get(), &UPlayerViewportWidget::SetSouls);
 }

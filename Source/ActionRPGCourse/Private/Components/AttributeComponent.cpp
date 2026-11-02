@@ -20,3 +20,13 @@ void UAttributeComponent::ReceiveDamage(float DamageAmount) {
 	OnHealthChanged.Broadcast(GetHealthPercent());
 }
 
+void UAttributeComponent::AddGold(int32 GoldAmount) {
+	Gold += GoldAmount;
+	OnGoldChanged.Broadcast(Gold);
+}
+
+void UAttributeComponent::AddSouls(int32 NumberOfSouls) {
+	Souls += NumberOfSouls;
+	OnSoulsChanged.Broadcast(Souls);
+}
+

@@ -23,5 +23,5 @@ private:
 	float RotationRate = 45.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Treasure Properties")
-	float GoldAmount = 5.0f;
+	int32 GoldAmount;
 };
