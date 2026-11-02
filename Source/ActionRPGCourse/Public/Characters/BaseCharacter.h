@@ -25,14 +25,14 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAttributeComponent> AttributeComponent;
 	
-	UPROPERTY(VisibleInstanceOnly, Category = "Equipment")
+	UPROPERTY(VisibleInstanceOnly, Category = "Combat|Equipment")
 	TObjectPtr<AWeapon> EquippedWeapon;
 	
 	/************************************
 	 *    Animation Related Variables   *
 	 ************************************/
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	float LifeSpanAfterDeath = 10.0f;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation|Montages")
@@ -76,10 +76,10 @@ private:
 	 *   Hit Related Variables   *
 	 ****************************/ 
 	
-	UPROPERTY(EditAnywhere, Category = "Sound")
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<USoundBase> HitSound;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<UParticleSystem> HitParticles;
 	
 	/******************

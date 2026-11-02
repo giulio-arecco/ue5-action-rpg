@@ -4,6 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GroomComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/AttributeComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Items/Weapons/Weapon.h"
@@ -134,6 +135,11 @@ void APlayerCharacter::InteractStarted() {
 
 void APlayerCharacter::DodgeStarted() {
 	if (ActionState != ECharacterActionState::ECAS_Unoccupied || GetCharacterMovement()->IsFalling()) return;
+	if (!ensureMsgf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName())) return;
+	
+	if (AttributeComponent->GetStamina() < DodgeStaminaCost) return;
+	
+	AttributeComponent->ConsumeStamina(DodgeStaminaCost);
 	ActionState = ECharacterActionState::ECAS_Dodging;
 	PlayDodgeMontage();
 }
@@ -145,7 +151,6 @@ void APlayerCharacter::PlayDodgeMontage() const {
 	if (!ensureMsgf(DodgeMontage != nullptr, TEXT("[%s] DodgeMontage is null"), *GetName())) return;
 	
 	AnimInstance->Montage_Play(DodgeMontage);
-	// AnimInstance->Montage_JumpToSection(FName("Default"), DodgeMontage);
 }
 
 void APlayerCharacter::EquipWeapon(AWeapon* OverlappingWeapon) {

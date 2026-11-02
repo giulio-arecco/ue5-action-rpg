@@ -10,6 +10,7 @@ ABaseCharacter::ABaseCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
 	
 	// Yeah, naming this "EnemyAttributes" was a mistake, but I couldn't bother reparenting derived BP classes, so...
+	// TODO: Change subobject name
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("EnemyAttributes"));
 	
 	UCapsuleComponent* Capsule = GetCapsuleComponent();

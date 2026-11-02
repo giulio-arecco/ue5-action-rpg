@@ -72,10 +72,10 @@ protected:
 	 *  Animation-related Variables  *
 	 ********************************/ 
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Equipment")
 	FName WeaponHandSocketName = "hand_r_socket";
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Equipment")
 	FName WeaponSpineSocketName = "spine_socket";
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation|Montages")
@@ -103,8 +103,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Hair")
 	TObjectPtr<UGroomComponent> Eyebrows;
 	
-	UPROPERTY(VisibleInstanceOnly, Category = "Equipment")
+	UPROPERTY(VisibleInstanceOnly)
 	TObjectPtr<AItem> OverlappingItem;
+	
+	UPROPERTY(VisibleInstanceOnly, Category = "Combat")
+	float DodgeStaminaCost = 25.0f;
 	
 	bool CanArm() const;
 	bool CanDisarm() const;
