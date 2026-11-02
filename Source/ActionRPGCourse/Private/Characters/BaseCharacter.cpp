@@ -44,10 +44,6 @@ void ABaseCharacter::Destroyed() {
 	}
 }
 
-void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
 void ABaseCharacter::SetEquippedWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled) const {
 	if (EquippedWeapon != nullptr) {
 		EquippedWeapon->SetWeaponBoxCollisionEnabled(CollisionEnabled);
