@@ -16,6 +16,9 @@ AItem::AItem() {
 	ItemMesh->SetupAttachment(ItemRoot);
 	
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("ItemSphere"));
+	Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Sphere->SetCollisionResponseToAllChannels(ECR_Ignore);
+	Sphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	Sphere->SetupAttachment(GetRootComponent());
 	Sphere->SetSphereRadius(150.0f);
 	
