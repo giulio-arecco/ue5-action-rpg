@@ -5,6 +5,7 @@
 #include "Components/AttributeComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBarComponent.h"
+#include "Items/Public/Soul.h"
 #include "Items/Weapons/Weapon.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/PawnSensingComponent.h"
@@ -212,6 +213,8 @@ void AEnemy::Die() {
 	HideHealthBar();
 	if (PatrolTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(PatrolTimerHandle);
 	if (AttackTimerHandle.IsValid()) GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+	
+	SpawnSoul();
 }
 
 void AEnemy::InitPatrolling() {
@@ -337,6 +340,21 @@ void AEnemy::AttackMontageEnd() {
 void AEnemy::AttackTimerEnd() {
 	if (!CanAttack()) return;
 	Attack();
+}
+
+void AEnemy::SpawnSoul() const {
+	if (!ensureAlwaysMsgf(AttributeComponent != nullptr, TEXT("[%s] AttributeComponent is null"), *GetName())) return;
+	if (!ensureAlwaysMsgf(SoulClass != nullptr, TEXT("[%s] SoulClass is null"), *GetName())) return;
+	
+	UWorld* World = GetWorld();
+	if (!ensureAlwaysMsgf(World != nullptr, TEXT("[%s] World is null"), *GetName())) return;
+	
+	const FTransform SpawnTransform(GetActorRotation(), GetActorLocation());
+	ASoul* SpawnedSoul = World->SpawnActorDeferred<ASoul>(SoulClass, SpawnTransform);
+	if (!ensureAlwaysMsgf(SpawnedSoul != nullptr, TEXT("[%s] SpawnedSoul is null in AEnemy::SpawnSoul"), *GetName())) return;
+	
+	SpawnedSoul->SetNumberOfSouls(AttributeComponent->GetSouls());
+	SpawnedSoul->FinishSpawning(SpawnTransform);
 }
 
 FVector AEnemy::ComputeMotionWarpingTarget() const {

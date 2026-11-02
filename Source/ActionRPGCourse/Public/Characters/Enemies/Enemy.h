@@ -5,6 +5,7 @@
 #include "Characters/CharacterTypes.h"
 #include "Enemy.generated.h"
 
+class ASoul;
 class UPawnSensingComponent;
 class AAIController;
 class UHealthBarComponent;
@@ -102,6 +103,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float CombatRadius = 150.0f;
 	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TSubclassOf<ASoul> SoulClass;
+	
 	float AttackTimerMin = 0.75f;
 	float AttackTimerMax = 1.2f;
 	FTimerHandle AttackTimerHandle;
@@ -135,4 +139,6 @@ private:
 	bool IsTargetValid(const AActor* Target) const;
 	/* Target must not be null */
 	bool IsInTargetRange(const AActor* Target, float Range) const;
+	
+	void SpawnSoul() const;
 };

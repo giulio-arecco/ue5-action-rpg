@@ -12,6 +12,7 @@ public:
 	ASoul();
 	virtual void Tick(float DeltaTime) override;
 	
+	FORCEINLINE void SetNumberOfSouls(int32 Souls) { NumberOfSouls = Souls; }
 
 protected:
 	virtual void BeginPlay() override;
