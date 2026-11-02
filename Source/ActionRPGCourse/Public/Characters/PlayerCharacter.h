@@ -64,6 +64,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AttackAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> DodgeAction;
 
 	/*********************************
 	 *  Animation-related Variables  *
@@ -77,6 +80,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation|Montages")
 	TObjectPtr<UAnimMontage> EquipMontage;
+	
+	UPROPERTY(EditAnywhere, Category = "Animation|Montages")
+	TObjectPtr<UAnimMontage> DodgeMontage;
 
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -112,12 +118,14 @@ private:
 	void LookTriggered(const FInputActionValue& Value);
 	void InteractStarted();
 	void AttackStarted();
+	void DodgeStarted();
 	
 	/*********************************
 	 *  Animation-related Functions  *
 	 ********************************/
 	
 	void PlayArmMontage(FName SectionName) const;
+	void PlayDodgeMontage() const;
 	void Arm();
 	void Disarm();
 	

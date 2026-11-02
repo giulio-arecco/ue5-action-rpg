@@ -83,6 +83,7 @@ DerivedDataCache/*
 # Third party asset packs
 Assets/
 Content/_Game/ThirdParty/
+Content/AncientContent/
 Content/StarterContent/
 Content/EuropeanBeech/
 Content/StylizedNaturePack/

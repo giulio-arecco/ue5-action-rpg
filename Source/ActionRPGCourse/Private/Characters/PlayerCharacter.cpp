@@ -64,17 +64,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LookTriggered);
 	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::InteractStarted);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::AttackStarted);
+	EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &APlayerCharacter::DodgeStarted);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 }
 
 void APlayerCharacter::GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) {
+	if (ActionState == ECharacterActionState::ECAS_Dead || ActionState == ECharacterActionState::ECAS_Dodging) return;
+		
 	Super::GetHit_Implementation(Hitter, ImpactPoint, ImpactNormal);
 	
-	if (ActionState != ECharacterActionState::ECAS_Dead && IsAlive()) {
-		ActionState = ECharacterActionState::ECAS_ReactingToHit;
-		PlayHitReactMontage(Hitter->GetActorLocation());
-	}
+	ActionState = ECharacterActionState::ECAS_ReactingToHit;
+	PlayHitReactMontage(Hitter->GetActorLocation());
 }
 
 void APlayerCharacter::HitReactMontageEnd() {
@@ -131,6 +132,22 @@ void APlayerCharacter::InteractStarted() {
 	}
 }
 
+void APlayerCharacter::DodgeStarted() {
+	if (ActionState != ECharacterActionState::ECAS_Unoccupied || GetCharacterMovement()->IsFalling()) return;
+	ActionState = ECharacterActionState::ECAS_Dodging;
+	PlayDodgeMontage();
+}
+
+void APlayerCharacter::PlayDodgeMontage() const {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	
+	if (!ensureMsgf(AnimInstance != nullptr, TEXT("[%s] AnimInstance is null"), *GetName())) return;
+	if (!ensureMsgf(DodgeMontage != nullptr, TEXT("[%s] DodgeMontage is null"), *GetName())) return;
+	
+	AnimInstance->Montage_Play(DodgeMontage);
+	// AnimInstance->Montage_JumpToSection(FName("Default"), DodgeMontage);
+}
+
 void APlayerCharacter::EquipWeapon(AWeapon* OverlappingWeapon) {
 	OverlappingWeapon->Equip(GetMesh(), WeaponHandSocketName, this, this);
 	CharacterState = ECharacterState::ECS_Armed;
@@ -166,10 +183,12 @@ void APlayerCharacter::Disarm() {
 
 void APlayerCharacter::PlayArmMontage(FName SectionName) const {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance != nullptr && EquipMontage != nullptr) {
-		AnimInstance->Montage_Play(EquipMontage);
-		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
-	}
+	
+	if (!ensureMsgf(AnimInstance != nullptr, TEXT("[%s] AnimInstance is null"), *GetName())) return;
+	if (!ensureMsgf(EquipMontage != nullptr, TEXT("[%s] EquipMontage is null"), *GetName())) return;
+	
+	AnimInstance->Montage_Play(EquipMontage);
+	AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
 }
 
 void APlayerCharacter::AttackStarted() {
@@ -192,7 +211,7 @@ void APlayerCharacter::Attack() {
 }
 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
-	if (ActionState == ECharacterActionState::ECAS_Dead) return 0.0f;
+	if (ActionState == ECharacterActionState::ECAS_Dead || ActionState == ECharacterActionState::ECAS_Dodging) return 0.0f;
 	
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
