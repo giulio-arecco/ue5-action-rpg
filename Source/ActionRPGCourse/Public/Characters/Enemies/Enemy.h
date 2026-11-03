@@ -23,9 +23,11 @@ public:
 	virtual void GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
-	
 	UFUNCTION(BlueprintPure)
 	FVector ComputeMotionWarpingTarget() const;
+	
+	UFUNCTION(BlueprintPure)
+	FORCEINLINE AActor* GetCombatTarget() const { return CombatTarget.Get(); }
 	
 protected:
 	virtual void ReceiveDamage(float DamageAmount) const override;
@@ -89,7 +91,7 @@ private:
 	 *********************************/ 
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	FName WeaponSocketName = "RightHandSocket";
+	FName WeaponSocketName = "WeaponSocket";
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TSubclassOf<AWeapon> WeaponClass;
@@ -98,7 +100,7 @@ private:
 	TWeakObjectPtr<AActor> CombatTarget;
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	float ChaseRadius = 2000.0f;
+	float ChaseRadius = 1500.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float CombatRadius = 150.0f;
@@ -106,7 +108,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TSubclassOf<ASoul> SoulClass;
 	
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	float AttackTimerMin = 0.75f;
+	
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	float AttackTimerMax = 1.2f;
 	FTimerHandle AttackTimerHandle;
 	

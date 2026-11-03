@@ -19,7 +19,7 @@ AEnemy::AEnemy() {
 	// TODO: Update PawnSensing to AI Perception
 	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("EnemyPawnSensingComponent"));
 	PawnSensingComponent->SetPeripheralVisionAngle(60.0f);
-	PawnSensingComponent->SightRadius = 1500.0f;
+	PawnSensingComponent->SightRadius = 1250.0f;
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationPitch = false;
