@@ -71,9 +71,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 }
 
 void APlayerCharacter::GetHit_Implementation(const AActor* Hitter, const FVector& ImpactPoint, const FVector& ImpactNormal) {
-	if (ActionState == ECharacterActionState::ECAS_Dead || ActionState == ECharacterActionState::ECAS_Dodging) return;
-		
+	if (ActionState == ECharacterActionState::ECAS_Dodging) return;
+	
 	Super::GetHit_Implementation(Hitter, ImpactPoint, ImpactNormal);
+	
+	if (ActionState == ECharacterActionState::ECAS_Dead) return;
 	
 	ActionState = ECharacterActionState::ECAS_ReactingToHit;
 	PlayHitReactMontage(Hitter->GetActorLocation());
