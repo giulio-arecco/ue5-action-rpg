@@ -11,6 +11,7 @@
 - [Items, Weapons, and Pickups](#items-weapons-and-pickups)
 - [Chaos Physics and Destructibles](#chaos-physics-and-destructibles)
 - [Engineering Patterns and Defensive Invariants](#engineering-patterns-and-defensive-invariants)
+- [License](#license)
 
 ## Introduction
 This repository contains a third-person Action RPG software architecture engineered in Unreal Engine 5.6 using C++ and Blueprint visual scripting. The system incorporates real-time melee combat, directional hit reactions, FSM-driven enemy AI, procedural foot Inverse Kinematics, Chaos physics destruction, and an event-driven attribute and UI infrastructure.
