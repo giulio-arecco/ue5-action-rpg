@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ## Table of Contents
-- [Introduction and Architectural Context](#introduction-and-architectural-context)
+- [Introduction](#introduction)
 - [Core Character Architecture and Combat Execution](#core-character-architecture-and-combat-execution)
 - [Player Character Systems and Locomotion](#player-character-systems-and-locomotion)
 - [Artificial Intelligence and Enemy Combat](#artificial-intelligence-and-enemy-combat)
