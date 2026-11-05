@@ -16,7 +16,7 @@
 ## Introduction
 This repository contains a third-person Action RPG software architecture engineered in Unreal Engine 5.6 using C++ and Blueprint visual scripting. The system incorporates real-time melee combat, directional hit reactions, FSM-driven enemy AI, procedural foot Inverse Kinematics, Chaos physics destruction, and an event-driven attribute and UI infrastructure.
 
-The project implementation originated from the curricula presented in the [Unreal Engine 5 - The Ultimate Game Developer Course](https://www.udemy.com/course/unreal-engine-5-the-ultimate-game-developer-course/) by Stephen Ulibarri. However, this codebase is not a direct replication of the instructional repository. Multiple architectural decisions and technical solutions were altered, expanded, and refined beyond the course material to evaluate alternative engineering designs and implement specialized mechanics.
+The project implementation originated from the curricula presented in the [Unreal Engine 5 C++ The Ultimate Game Developer Course](https://www.udemy.com/course/unreal-engine-5-the-ultimate-game-developer-course/) by Stephen Ulibarri. However, this codebase is not a direct replication of the instructional repository. Multiple architectural decisions and technical solutions were altered, expanded, and refined beyond the course material to evaluate alternative engineering designs and implement specialized mechanics.
 
 ## Core Character Architecture and Combat Execution
 
